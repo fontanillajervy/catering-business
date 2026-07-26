@@ -21,7 +21,8 @@ class StoreInquiryRequest extends FormRequest
             'category' => ['required', 'string', 'max:100'],
             'message' => ['required', 'string', 'max:2000'],
             'website' => ['prohibited'],
-            'captcha_token' => ['required', 'string'],
+            'form_started' => ['required', 'integer'],
+            'captcha_answer' => ['required', 'integer', 'min:0', 'max:99'],
         ];
     }
 
@@ -32,7 +33,7 @@ class StoreInquiryRequest extends FormRequest
             'contact_number.required' => 'Please provide a contact number.',
             'email.required' => 'Please provide your email address.',
             'message.required' => 'Please share your inquiry details.',
-            'captcha_token.required' => 'Captcha verification is required.',
+            'captcha_answer.required' => 'Please answer the security question.',
         ];
     }
 }

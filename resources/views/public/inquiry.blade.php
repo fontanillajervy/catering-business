@@ -22,6 +22,7 @@
                 <form method="POST" action="{{ route('inquiry.store') }}">
                     @csrf
                     <input type="text" name="website" class="d-none" tabindex="-1" autocomplete="off">
+                    <input type="hidden" name="form_started" value="{{ now()->timestamp }}">
                     <div class="row g-3">
                         <div class="col-md-6"><label class="form-label">Full Name</label><input type="text" name="full_name" class="form-control form-control-lg" required></div>
                         <div class="col-md-6"><label class="form-label">Contact Number</label><input type="text" name="contact_number" class="form-control form-control-lg" required></div>
@@ -29,11 +30,7 @@
                         <div class="col-md-6"><label class="form-label">Subject</label><input type="text" name="subject" class="form-control form-control-lg" required></div>
                         <div class="col-md-6"><label class="form-label">Category</label><select name="category" class="form-select form-select-lg" required><option value="">Select</option><option>General Inquiry</option><option>Reservation</option><option>Packages</option><option>Pricing</option><option>Custom Event</option><option>Others</option></select></div>
                         <div class="col-12"><label class="form-label">Message</label><textarea name="message" class="form-control" rows="5" required></textarea></div>
-                        <div class="col-12">
-                            <label class="form-label">Security Verification</label>
-                            <input type="hidden" name="captcha_token" value="demo-captcha">
-                            <div class="alert alert-info mb-0">Captcha check passed (demo mode).</div>
-                        </div>
+                        <div class="col-md-6"><label class="form-label">Security question: {{ $captchaQuestion }} = ?</label><input type="number" name="captcha_answer" class="form-control" required><div class="form-text">This helps us block automated requests.</div></div>
                         <div class="col-12"><button type="submit" class="btn btn-primary px-4 py-2">Submit Inquiry</button></div>
                     </div>
                 </form>

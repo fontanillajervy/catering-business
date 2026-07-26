@@ -18,7 +18,7 @@ class BackupController extends Controller
     {
         $path = $backupService->create();
 
-        return back()->with('success', 'Backup created: ' . $path);
+        return back()->with('success', 'Database backup created successfully.');
     }
 
     public function restoreBackup(Request $request, BackupService $backupService)

@@ -19,8 +19,10 @@
     <div class="row g-3 mb-4">
         <div class="col-md-3"><a class="btn luxury-btn w-100" href="{{ route('admin.reservations') }}">Reservations</a></div>
         <div class="col-md-3"><a class="btn btn-outline-secondary w-100" href="{{ route('admin.inquiries') }}">Inquiries</a></div>
+        @if(session('admin_role') === 'full')
         <div class="col-md-3"><a class="btn btn-outline-secondary w-100" href="{{ route('admin.analytics') }}">Analytics</a></div>
         <div class="col-md-3"><a class="btn btn-outline-secondary w-100" href="{{ route('admin.activity-logs') }}">Activity Logs</a></div>
+        @endif
     </div>
 
     <div class="row g-4">

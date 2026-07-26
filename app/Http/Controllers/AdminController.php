@@ -7,6 +7,7 @@ use App\Models\Package;
 use App\Models\Reservation;
 use App\Models\Service;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
@@ -23,8 +24,12 @@ class AdminController extends Controller
     public function reservations()
     {
         $reservations = Reservation::with('client', 'package')->latest()->get();
+        $customerCount = Reservation::query()->distinct('email')->count('email');
+        $pendingCount = $reservations->where('status', 'pending')->count();
+        $acceptedCount = $reservations->where('status', 'confirmed')->count();
+        $cancelledCount = $reservations->where('status', 'cancelled')->count();
 
-        return view('admin.reservations', compact('reservations'));
+        return view('admin.reservations', compact('reservations', 'customerCount', 'pendingCount', 'acceptedCount', 'cancelledCount'));
     }
 
     public function inquiries()
@@ -36,13 +41,16 @@ class AdminController extends Controller
 
     public function analytics()
     {
-        $monthlyReservations = Reservation::select(DB::raw('MONTH(created_at) as month'), DB::raw('COUNT(*) as total'))
-            ->groupBy(DB::raw('MONTH(created_at)'))
-            ->get();
-
-        $monthlyRevenue = Reservation::select(DB::raw('MONTH(created_at) as month'), DB::raw('SUM(estimated_budget) as revenue'))
-            ->groupBy(DB::raw('MONTH(created_at)'))
-            ->get();
+        $months = collect(range(0, 11))->map(fn ($offset) => now()->startOfMonth()->subMonths(11 - $offset));
+        $reservations = Reservation::select(['id', 'package_id', 'status', 'estimated_budget', 'created_at'])->get();
+        $monthlyReservations = $months->map(fn ($month) => (object) [
+            'label' => $month->format('M'),
+            'total' => $reservations->filter(fn ($reservation) => $reservation->created_at->format('Y-m') === $month->format('Y-m'))->count(),
+        ]);
+        $monthlyRevenue = $months->map(fn ($month) => (object) [
+            'label' => $month->format('M'),
+            'revenue' => $reservations->filter(fn ($reservation) => $reservation->created_at->format('Y-m') === $month->format('Y-m') && in_array($reservation->status, ['confirmed', 'completed'], true))->sum('estimated_budget'),
+        ]);
 
         $topPackages = Reservation::join('packages', 'packages.id', '=', 'reservations.package_id')
             ->select('packages.name', DB::raw('COUNT(*) as total'))
@@ -51,6 +59,23 @@ class AdminController extends Controller
             ->take(5)
             ->get();
 
-        return view('admin.analytics', compact('monthlyReservations', 'monthlyRevenue', 'topPackages'));
+        $activity = Inquiry::where('created_at', '>=', now()->subDays(6)->startOfDay())->get()
+            ->groupBy(fn ($inquiry) => $inquiry->created_at->toDateString());
+        $activityLabels = collect(range(0, 6))->map(fn ($offset) => now()->subDays(6 - $offset)->format('D'));
+        $activityData = collect(range(0, 6))->map(fn ($offset) => $activity->get(now()->subDays(6 - $offset)->toDateString(), collect())->count());
+
+        return view('admin.analytics', compact('monthlyReservations', 'monthlyRevenue', 'topPackages', 'activityLabels', 'activityData'));
+    }
+
+    public function updateReservationStatus(Request $request, Reservation $reservation)
+    {
+        $reservation->update($request->validate(['status' => ['required', 'in:pending,confirmed,completed,cancelled']]));
+        return back()->with('success', 'Reservation status updated.');
+    }
+
+    public function updateInquiryStatus(Request $request, Inquiry $inquiry)
+    {
+        $inquiry->update($request->validate(['status' => ['required', 'in:new,in_progress,responded,closed']]));
+        return back()->with('success', 'Inquiry status updated.');
     }
 }

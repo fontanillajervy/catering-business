@@ -13,6 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'ensure.admin' => \App\Http\Middleware\EnsureAdmin::class,
+            'ensure.full-admin' => \App\Http\Middleware\EnsureFullAdmin::class,
             'capture.activity' => \App\Http\Middleware\CaptureActivity::class,
         ]);
     })

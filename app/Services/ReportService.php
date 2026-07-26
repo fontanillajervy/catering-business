@@ -18,15 +18,16 @@ class ReportService
             default => now()->startOfDay(),
         };
 
-        $reservations = Reservation::where('created_at', '>=', $start)->count();
-        $inquiries = Inquiry::where('created_at', '>=', $start)->count();
-        $revenue = Reservation::where('created_at', '>=', $start)->sum('estimated_budget');
+        $reservations = Reservation::where('created_at', '>=', $start);
 
         return [
             'period' => $period,
-            'reservations' => $reservations,
-            'inquiries' => $inquiries,
-            'revenue' => (float) $revenue,
+            'reservation_count' => $reservations->count(),
+            'confirmed_reservations' => (clone $reservations)->where('status', 'confirmed')->count(),
+            'completed_events' => (clone $reservations)->where('status', 'completed')->count(),
+            'cancelled_reservations' => (clone $reservations)->where('status', 'cancelled')->count(),
+            'inquiry_count' => Inquiry::where('created_at', '>=', $start)->count(),
+            'estimated_revenue' => (float) (clone $reservations)->whereIn('status', ['confirmed', 'completed'])->sum('estimated_budget'),
         ];
     }
 }

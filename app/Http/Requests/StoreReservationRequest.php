@@ -24,12 +24,13 @@ class StoreReservationRequest extends FormRequest
             'venue' => ['required', 'string', 'max:255'],
             'guest_count' => ['required', 'integer', 'min:1', 'max:1000'],
             'estimated_budget' => ['required', 'numeric', 'min:0'],
-            'package_id' => ['nullable', 'exists:packages,id'],
+            'package_id' => ['required', 'exists:packages,id'],
             'additional_services' => ['nullable', 'string', 'max:1000'],
             'special_requests' => ['nullable', 'string', 'max:1000'],
             'additional_notes' => ['nullable', 'string', 'max:1000'],
             'website' => ['prohibited'],
-            'captcha_token' => ['required', 'string'],
+            'form_started' => ['required', 'integer'],
+            'captcha_answer' => ['required', 'integer', 'min:0', 'max:99'],
         ];
     }
 
@@ -41,7 +42,7 @@ class StoreReservationRequest extends FormRequest
             'email.required' => 'Please provide your email address.',
             'event_date.after_or_equal' => 'Event date must be today or later.',
             'guest_count.max' => 'Guest count cannot exceed 1000.',
-            'captcha_token.required' => 'Captcha verification is required.',
+            'captcha_answer.required' => 'Please answer the security question.',
         ];
     }
 }

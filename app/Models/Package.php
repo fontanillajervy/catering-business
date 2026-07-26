@@ -19,4 +19,12 @@ class Package extends Model
         'event_type',
         'is_featured',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'price' => 'decimal:2',
+            'is_featured' => 'boolean',
+        ];
+    }
 }

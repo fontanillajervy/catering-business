@@ -1,26 +1,9 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="content-card p-4">
-    <h1 class="fw-bold mb-4">Inquiries</h1>
-    <div class="table-responsive">
-        <table class="table table-striped mb-0">
-            <thead>
-                <tr><th>Name</th><th>Subject</th><th>Category</th><th>Status</th></tr>
-            </thead>
-            <tbody>
-                @forelse($inquiries as $inquiry)
-                    <tr>
-                        <td>{{ $inquiry->full_name }}</td>
-                        <td>{{ $inquiry->subject }}</td>
-                        <td>{{ $inquiry->category }}</td>
-                        <td>{{ $inquiry->status }}</td>
-                    </tr>
-                @empty
-                    <tr><td colspan="4">No inquiries found.</td></tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-</div>
+<div class="content-card p-4"><div class="mb-4"><h1 class="fw-bold mb-1">Inquiries</h1><p class="text-muted mb-0">Track messages from prospective clients.</p></div>@if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
+<div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th>Client</th><th>Inquiry</th><th>Message</th><th>Status</th><th></th></tr></thead><tbody>
+@forelse($inquiries as $inquiry)<tr><td><strong>{{ $inquiry->full_name }}</strong><br><small class="text-muted">{{ $inquiry->email }} · {{ $inquiry->contact_number }}</small></td><td>{{ $inquiry->subject }}<br><small class="text-muted">{{ $inquiry->category }}</small></td><td class="text-muted" style="min-width:220px">{{ \Illuminate\Support\Str::limit($inquiry->message, 100) }}</td><td>{{ ucwords(str_replace('_', ' ', $inquiry->status)) }}</td><td><form class="d-flex gap-2" method="POST" action="{{ route('admin.inquiries.status', $inquiry) }}">@csrf @method('PATCH')<select name="status" class="form-select form-select-sm"><option value="new" @selected($inquiry->status === 'new')>New</option><option value="in_progress" @selected($inquiry->status === 'in_progress')>In progress</option><option value="responded" @selected($inquiry->status === 'responded')>Responded</option><option value="closed" @selected($inquiry->status === 'closed')>Closed</option></select><button class="btn btn-sm luxury-btn">Save</button></form></td></tr>
+@empty<tr><td colspan="5" class="text-center py-4 text-muted">No inquiries found.</td></tr>@endforelse
+</tbody></table></div></div>
 @endsection

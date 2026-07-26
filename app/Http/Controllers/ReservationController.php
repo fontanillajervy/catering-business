@@ -8,8 +8,34 @@ use App\Models\Reservation;
 
 class ReservationController extends Controller
 {
+    public function availability(\Illuminate\Http\Request $request)
+    {
+        $data = $request->validate(['date' => ['required', 'date', 'after_or_equal:today']]);
+        $bookings = Reservation::whereDate('event_date', $data['date'])
+            ->where('status', '!=', 'cancelled')
+            ->count();
+
+        return response()->json(['bookings' => $bookings, 'remaining' => max(0, 3 - $bookings), 'available' => $bookings < 3]);
+    }
+
     public function store(StoreReservationRequest $request)
     {
+        if (now()->timestamp - (int) $request->input('form_started') < 3) {
+            return back()->withInput()->withErrors(['full_name' => 'Unable to submit this request. Please try again.']);
+        }
+
+        if ((int) $request->input('captcha_answer') !== (int) session('form_captcha_answer')) {
+            return back()->withInput()->withErrors(['captcha_answer' => 'Please answer the security question correctly.']);
+        }
+
+        $bookings = Reservation::whereDate('event_date', $request->input('event_date'))
+            ->where('status', '!=', 'cancelled')
+            ->count();
+
+        if ($bookings >= 3) {
+            return back()->withInput()->withErrors(['event_date' => 'This date is fully booked. Please select another date.']);
+        }
+
         $client = Client::firstOrCreate(
             ['email' => $request->input('email')],
             [
@@ -37,6 +63,8 @@ class ReservationController extends Controller
             'additional_notes' => $request->input('additional_notes'),
             'status' => 'pending',
         ]);
+
+        $request->session()->forget('form_captcha_answer');
 
         return redirect()->back()->with('success', 'Your reservation request has been received.');
     }
