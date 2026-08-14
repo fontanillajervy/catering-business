@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Package;
+use App\Models\GalleryItem;
 use App\Models\Service;
 
 class PublicController extends Controller
@@ -41,7 +42,7 @@ class PublicController extends Controller
 
     public function gallery()
     {
-        return view('public.gallery');
+        return view('public.gallery', ['galleryItems' => GalleryItem::latest()->get()]);
     }
 
     public function reservation()
@@ -82,7 +83,8 @@ class PublicController extends Controller
             ['name' => 'Platinum', 'slug' => 'platinum', 'description' => 'A refined menu and fuller service for memorable celebrations.', 'price' => 950, 'min_guests' => 80, 'max_guests' => 250, 'menu' => '4 mains, pasta, vegetables, rice, premium dessert station, and drinks', 'freebies' => 'Enhanced tablescape, welcome drinks, menu labels, and dedicated event lead', 'addons' => 'Live station, mobile bar, and premium floral styling', 'event_type' => 'Weddings, launches, and formal celebrations', 'is_featured' => false],
             ['name' => 'Diamond', 'slug' => 'diamond', 'description' => 'Our most complete celebration experience for grand events.', 'price' => 1250, 'min_guests' => 120, 'max_guests' => 400, 'menu' => '5 mains, live station, pasta, vegetables, rice, premium desserts, and drinks', 'freebies' => 'Full event styling consultation, upgraded tablescape, service team, and event lead', 'addons' => 'Custom menu development, lounge setup, and premium bar service', 'event_type' => 'Luxury weddings, gala dinners, and large-scale events', 'is_featured' => false],
         ] as $package) {
-            Package::updateOrCreate(['slug' => $package['slug']], $package);
+            // Only seed packages that do not exist. Admin edits must remain intact.
+            Package::firstOrCreate(['slug' => $package['slug']], $package);
         }
     }
 

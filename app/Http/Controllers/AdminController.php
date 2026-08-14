@@ -7,6 +7,7 @@ use App\Models\Package;
 use App\Models\Reservation;
 use App\Models\Service;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
@@ -37,6 +38,38 @@ class AdminController extends Controller
         $inquiries = Inquiry::latest()->get();
 
         return view('admin.inquiries', compact('inquiries'));
+    }
+
+    public function showInquiry(Inquiry $inquiry)
+    {
+        if ($inquiry->status === 'new') {
+            $inquiry->update(['status' => 'in_progress']);
+        }
+
+        return view('admin.inquiry-show', compact('inquiry'));
+    }
+
+    public function replyToInquiry(Request $request, Inquiry $inquiry)
+    {
+        $data = $request->validate(['reply' => ['required', 'string', 'max:5000']]);
+
+        try {
+            Mail::raw($data['reply'], function ($message) use ($inquiry) {
+                $message->to($inquiry->email, $inquiry->full_name)->subject('Re: ' . $inquiry->subject);
+            });
+        } catch (\Throwable $exception) {
+            report($exception);
+            return back()->with('error', 'The reply could not be sent. Check the mail settings and try again.');
+        }
+
+        $inquiry->update(['admin_reply' => $data['reply'], 'replied_at' => now(), 'status' => 'responded']);
+        return redirect()->route('admin.inquiries.show', $inquiry)->with('success', 'Reply sent to ' . $inquiry->email . '.');
+    }
+
+    public function destroyInquiry(Inquiry $inquiry)
+    {
+        $inquiry->delete();
+        return redirect()->route('admin.inquiries')->with('success', 'Inquiry deleted.');
     }
 
     public function analytics()

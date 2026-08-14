@@ -6,5 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Inquiry extends Model
 {
-    protected $fillable = ['full_name', 'contact_number', 'email', 'subject', 'category', 'message', 'status'];
+    protected $fillable = ['full_name', 'contact_number', 'email', 'subject', 'category', 'message', 'status', 'admin_reply', 'replied_at'];
+
+    protected function casts(): array
+    {
+        return ['replied_at' => 'datetime'];
+    }
 }

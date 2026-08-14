@@ -1,241 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3YOS Admin Panel</title>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3YOS Operations</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        :root {
-            --bg: #f5efe8;
-            --surface: #fffdf9;
-            --surface-2: #f8ede3;
-            --text: #1f2937;
-            --muted: #6b7280;
-            --accent: #8b5e3c;
-            --accent-2: #c77f45;
-            --border: rgba(139, 94, 60, 0.16);
-        }
-        body {
-            font-family: "Segoe UI", Arial, sans-serif;
-            background: linear-gradient(135deg, #f7efe7 0%, #efe3d2 100%);
-            color: var(--text);
-        }
-        .sidebar {
-            background: linear-gradient(180deg, #121826 0%, #1f2937 100%);
-        }
-        .sidebar .nav-link {
-            color: #e5e7eb;
-            border-radius: 12px;
-            padding: 0.8rem 0.9rem;
-            margin-bottom: 0.35rem;
-            display: flex;
-            align-items: center;
-            gap: 0.7rem;
-        }
-        .sidebar .nav-link:hover,
-        .sidebar .nav-link.active {
-            background: rgba(255,255,255,0.12);
-            color: #fff;
-        }
-        .sidebar-icon {
-            width: 34px;
-            height: 34px;
-            border-radius: 10px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255,255,255,0.12);
-            font-size: 0.95rem;
-        }
-        .content-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 22px;
-            box-shadow: 0 16px 40px rgba(0,0,0,0.06);
-        }
-        .stat-card {
-            background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
-            border: 1px solid var(--border);
-            border-radius: 18px;
-            min-height: 140px;
-        }
-        .table thead {
-            background: #f8ede3;
-            color: var(--accent);
-        }
-        .table td, .table th {
-            vertical-align: middle;
-        }
-        .badge-soft {
-            background: rgba(139, 94, 60, 0.12);
-            color: var(--accent);
-            border-radius: 999px;
-            padding: 0.35rem 0.7rem;
-            font-weight: 700;
-            font-size: 0.8rem;
-        }
-        .luxury-btn {
-            background: linear-gradient(135deg, var(--accent), var(--accent-2));
-            color: #fff;
-            border: none;
-        }
-        .header-bar {
-            background: rgba(255,255,255,0.78);
-            backdrop-filter: blur(12px);
-        }
-        .stat-card, .mini-card, .content-card, .table-responsive, .card {
-            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-        }
-        .stat-card:hover, .mini-card:hover, .content-card:hover, .card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 30px rgba(0,0,0,0.08);
-        }
-        body.dark-mode {
-            background: linear-gradient(135deg, #0f172a 0%, #111827 100%);
-            color: #f8fafc;
-        }
-        body.dark-mode .header-bar {
-            background: rgba(17,24,39,0.9);
-            color: #f8fafc;
-        }
-        body.dark-mode .content-card,
-        body.dark-mode .stat-card,
-        body.dark-mode .card {
-            background: #1f2937;
-            color: #f8fafc;
-            border-color: rgba(255,255,255,0.08);
-        }
-        body.dark-mode .text-muted {
-            color: #cbd5e1 !important;
-        }
-        body.dark-mode main :is(h1,h2,h3,h4,h5,h6,p,span,td,th,label,small) {
-            color: inherit;
-        }
-        body.dark-mode main .text-muted { color: #cbd5e1 !important; }
-        body.dark-mode .badge-soft { background:rgba(226, 175, 132, .18); color:#f5c69f; }
-        body.dark-mode .mini-card,
-        body.dark-mode [style*="background:#f8ede3"] { background:#293548 !important; color:#f8fafc; }
-        body.dark-mode .table thead {
-            background: #334155;
-            color: #f8fafc;
-        }
-        body.dark-mode .sidebar {
-            background: linear-gradient(180deg, #020617 0%, #0f172a 100%);
-        }
-        body.dark-mode .btn-outline-secondary {
-            color: #f8fafc;
-            border-color: #64748b;
-        }
-        body.dark-mode .table { --bs-table-color:#f8fafc; --bs-table-bg:transparent; --bs-table-hover-color:#fff; --bs-table-hover-bg:rgba(255,255,255,.06); --bs-table-striped-color:#f8fafc; --bs-table-striped-bg:rgba(255,255,255,.04); }
-        body.dark-mode .form-control, body.dark-mode .form-select { background:#111827; color:#f8fafc; border-color:#475569; }
-        body.dark-mode .form-control:focus, body.dark-mode .form-select:focus { background:#111827; color:#fff; }
-        body.dark-mode .dropdown-menu { background:#1f2937; border-color:#475569; }
-        body.dark-mode .dropdown-item { color:#f8fafc; }
-        body.dark-mode .dropdown-item:hover { background:#334155; color:#fff; }
-        body:not(.dark-mode) { background:linear-gradient(135deg,#f7efe7 0%,#efe3d2 100%); color:#1f2937; }
-        body:not(.dark-mode) .content-card, body:not(.dark-mode) .stat-card, body:not(.dark-mode) .card { color:#1f2937; }
-        body:not(.dark-mode) .table { --bs-table-color:#1f2937; --bs-table-bg:transparent; --bs-table-hover-color:#1f2937; --bs-table-hover-bg:rgba(139,94,60,.06); }
-        body:not(.dark-mode) .form-control, body:not(.dark-mode) .form-select { color:#1f2937; background:#fff; }
-        .table-responsive { -webkit-overflow-scrolling:touch; }
-        @media (max-width: 991px) {
-            .sidebar { position:fixed; inset:0 auto 0 0; z-index:1050; width:min(82vw,320px); min-height:100vh!important; overflow-y:auto; transform:translateX(-105%); transition:transform .22s ease; box-shadow:16px 0 34px rgba(0,0,0,.24); }
-            body.mobile-admin-nav-open .sidebar { transform:translateX(0); }
-            .admin-nav-backdrop { display:none; position:fixed; inset:0; z-index:1040; background:rgba(2,6,23,.55); }
-            body.mobile-admin-nav-open .admin-nav-backdrop { display:block; }
-            .sidebar > .p-4 { padding:1.4rem!important; }
-            .sidebar nav { display:block; padding:1rem!important; }
-            .sidebar .nav-link { margin-bottom:.35rem; padding:.75rem .8rem; }
-            .sidebar-icon { width:28px; height:28px; }
-            .header-bar { padding:1rem!important; }
-        }
-        @media (max-width: 575px) {
-            body { overflow-x:hidden; }
-            main > .p-4 { padding:1rem!important; }
-            .content-card { border-radius:14px; }
-            .btn { min-height:42px; display:inline-flex; align-items:center; justify-content:center; }
-            .form-control,.form-select { min-height:44px; font-size:16px; }
-            .admin-heading { width:100%; }
-            .admin-heading h4 { font-size:1.05rem; }
-            .admin-header-actions { display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr)); width:100%; }
-            .admin-header-actions > *, .admin-header-actions .btn { width:100%; min-width:0; }
-            .admin-header-actions .dropdown-menu { max-width:calc(100vw - 2rem); }
-        }
+        :root{--navy:#0f2438;--navy-2:#173a58;--teal:#0d8b83;--teal-dark:#087168;--mint:#e8f7f5;--ink:#152537;--muted:#677789;--canvas:#f4f7fa;--surface:#fff;--line:#e4eaf0;--danger:#c54545;--shadow:0 12px 30px rgba(21,37,55,.07)}
+        *{box-sizing:border-box} body{font-family:"DM Sans",sans-serif;background:var(--canvas);color:var(--ink);font-size:.93rem}.sidebar{background:linear-gradient(165deg,#102c45,#0b1c2d);box-shadow:10px 0 34px rgba(15,36,56,.12)}
+        .brand{padding:1.8rem 1.6rem 1.45rem;border-bottom:1px solid rgba(255,255,255,.11)}.brand-mark{width:38px;height:38px;display:grid;place-items:center;border-radius:12px;background:#26aaa0;color:#fff;font-family:Manrope,sans-serif;font-weight:800;letter-spacing:-.1em}.brand h4{font-family:Manrope,sans-serif;letter-spacing:-.04em;font-size:1.1rem}.brand-subtitle{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:#9db1c4}
+        .sidebar nav{padding:1.25rem .85rem}.nav-caption{margin:.5rem .75rem .65rem;color:#7f9aaf;font-size:.66rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase}.sidebar .nav-link{position:relative;display:flex;align-items:center;gap:.78rem;margin:.2rem 0;padding:.76rem .85rem;border-radius:10px;color:#bbcad6;font-weight:600;transition:.18s ease}.sidebar .nav-link:hover{background:rgba(255,255,255,.08);color:#fff}.sidebar .nav-link.active{background:#1d4968;color:#fff;box-shadow:inset 3px 0 #41c8b6}.sidebar-icon{width:24px;text-align:center;color:#80d7cd;font-size:.73rem;font-weight:800;letter-spacing:0}
+        .header-bar{position:sticky;top:0;z-index:1020;min-height:76px;background:rgba(255,255,255,.88);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}.page-kicker{color:var(--teal);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;font-weight:800}.admin-heading h4{font-family:Manrope,sans-serif;font-size:1.05rem;letter-spacing:-.03em}.header-btn{border:1px solid var(--line);background:#fff;color:#46576a;border-radius:9px;font-size:.8rem;font-weight:700;padding:.55rem .75rem}.header-btn:hover{border-color:#9bcfc9;color:var(--teal-dark);background:var(--mint)}
+        .content-card,.card{background:var(--surface);border:1px solid var(--line);border-radius:15px;box-shadow:var(--shadow)}.content-card{padding:1.6rem!important}.content-card>div>h1,.content-card h1{font-family:Manrope,sans-serif;letter-spacing:-.045em;font-size:1.6rem}.text-muted{color:var(--muted)!important}.stat-card{height:100%;padding:1.35rem!important;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);transition:.18s ease}.stat-card:hover,.card:hover{transform:translateY(-2px);box-shadow:0 17px 34px rgba(21,37,55,.1)}.badge-soft{display:inline-block;padding:.3rem .58rem;background:var(--mint);border-radius:6px;color:var(--teal-dark);font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase}.stat-card h3{font-family:Manrope,sans-serif;font-size:2rem;letter-spacing:-.06em;margin:.7rem 0 .2rem}.luxury-btn{border:0;border-radius:9px;background:var(--teal);color:#fff;font-weight:700;box-shadow:0 5px 12px rgba(13,139,131,.2)}.luxury-btn:hover,.luxury-btn:focus{background:var(--teal-dark);color:#fff}.btn{border-radius:8px;font-weight:700}.btn-outline-secondary{border-color:#ccd7e1;color:#4c6073}.btn-outline-secondary:hover{background:#eef6f6;border-color:#a4d5cf;color:var(--teal-dark)}
+        .table{--bs-table-color:var(--ink);--bs-table-bg:transparent;--bs-table-hover-bg:#f5fbfb;--bs-table-hover-color:var(--ink);margin-bottom:0}.table thead{background:#f7f9fb;color:#627387;font-size:.69rem;letter-spacing:.08em;text-transform:uppercase}.table th{padding:.85rem 1rem;border-bottom:1px solid var(--line);white-space:nowrap}.table td{padding:1rem;border-color:var(--line);vertical-align:middle}.form-control,.form-select{border:1px solid #d9e2ea;border-radius:8px;padding:.6rem .75rem;color:var(--ink)}.form-control:focus,.form-select:focus{border-color:#3cb8ad;box-shadow:0 0 0 .2rem rgba(13,139,131,.12)}.alert{border:0;border-radius:10px;font-weight:600}.alert-success{background:#e7f7ee;color:#17633d}.alert-danger{background:#fff0f0;color:#9d3333}
+        body.dark-mode{--canvas:#101b27;--surface:#172635;--ink:#edf5fb;--muted:#b4c2ce;--line:#2c4153;--mint:#153f42;background:var(--canvas)}body.dark-mode .header-bar{background:rgba(16,27,39,.94)}body.dark-mode .header-btn{background:#172635;border-color:var(--line);color:#edf5fb}body.dark-mode main :is(h1,h2,h3,h4,h5,h6,p,span,td,th,label,small,strong,li){color:var(--ink)}body.dark-mode main .text-muted{color:var(--muted)!important}body.dark-mode main a:not(.btn){color:#75d8cf}body.dark-mode .table{--bs-table-color:var(--ink);--bs-table-bg:transparent;--bs-table-hover-bg:#1d3343;--bs-table-hover-color:var(--ink)}body.dark-mode .table thead{background:#1d3343;color:#d8e7f0}body.dark-mode .table thead th{color:#d8e7f0}body.dark-mode .form-control,body.dark-mode .form-select{background:#12202e;border-color:#3a5163;color:var(--ink)}body.dark-mode .form-control::placeholder{color:#8ca0b2}body.dark-mode .form-select option{background:#12202e;color:var(--ink)}body.dark-mode .dropdown-menu{background:#172635;border-color:var(--line)}body.dark-mode .dropdown-item{color:var(--ink)}body.dark-mode .btn-outline-secondary{color:#e4eff6;border-color:#527087}body.dark-mode .btn-outline-danger{color:#ffb7b7;border-color:#a25c62}body.dark-mode [style*="background:#f8ede3"]{background:#1d3343!important}
+        @media(max-width:991px){.sidebar{position:fixed;inset:0 auto 0 0;z-index:1050;width:min(82vw,310px);min-height:100vh!important;overflow-y:auto;transform:translateX(-105%);transition:transform .22s ease}.mobile-admin-nav-open .sidebar{transform:translateX(0)}.admin-nav-backdrop{display:none;position:fixed;inset:0;z-index:1040;background:rgba(4,15,25,.6)}.mobile-admin-nav-open .admin-nav-backdrop{display:block}.header-bar{position:static}.content-card{padding:1.2rem!important}}
+        @media(max-width:575px){body{font-size:.9rem}.content-card{border-radius:12px}.admin-header-actions{display:grid!important;grid-template-columns:1fr 1fr;width:100%}.admin-header-actions>*{width:100%}.admin-header-actions .btn{width:100%;min-height:39px}.content-card h1{font-size:1.4rem}.table td,.table th{padding:.8rem}.btn{min-height:40px}}
     </style>
 </head>
 <body>
 <div class="admin-nav-backdrop" id="adminNavBackdrop"></div>
-<div class="container-fluid">
-    <div class="row min-vh-100">
-        <aside class="col-lg-3 col-xl-2 sidebar text-white p-0">
-            <div class="p-4 border-bottom border-secondary">
-                <h4 class="fw-bold mb-1">3YOS Admin</h4>
-                <p class="mb-0 small text-white-50">Luxury Operations Suite</p>
-            </div>
-            <nav class="p-3">
-                <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}"><span class="sidebar-icon">◉</span> Dashboard</a>
-                <a class="nav-link {{ request()->routeIs('admin.reservations') ? 'active' : '' }}" href="{{ route('admin.reservations') }}"><span class="sidebar-icon">▣</span> Reservations</a>
-                <a class="nav-link {{ request()->routeIs('admin.inquiries') ? 'active' : '' }}" href="{{ route('admin.inquiries') }}"><span class="sidebar-icon">✉</span> Inquiries</a>
-                @if(session('admin_role') === 'full')
-                <a class="nav-link {{ request()->routeIs('admin.users') ? 'active' : '' }}" href="{{ route('admin.users') }}"><span class="sidebar-icon">♙</span> Team Admins</a>
-                <a class="nav-link {{ request()->routeIs('admin.reports') ? 'active' : '' }}" href="{{ route('admin.reports') }}"><span class="sidebar-icon">◫</span> Reports</a>
-                <a class="nav-link {{ request()->routeIs('admin.analytics') ? 'active' : '' }}" href="{{ route('admin.analytics') }}"><span class="sidebar-icon">⬢</span> Analytics</a>
-                <a class="nav-link {{ request()->routeIs('admin.activity-logs') ? 'active' : '' }}" href="{{ route('admin.activity-logs') }}"><span class="sidebar-icon">⌁</span> Activity Logs</a>
-                @endif
-                <a class="nav-link {{ request()->routeIs('admin.backups') ? 'active' : '' }}" href="{{ route('admin.backups') }}"><span class="sidebar-icon">⬇</span> Backups</a>
-            </nav>
-        </aside>
-
-        <main class="col-lg-9 col-xl-10 p-0">
-            <header class="header-bar border-bottom p-3 px-4 d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-2">
-                <div class="admin-heading d-flex align-items-center gap-2">
-                    <button class="btn btn-outline-secondary d-lg-none" type="button" id="adminMobileMenu" aria-controls="adminSidebar" aria-expanded="false">☰ Menu</button>
-                    <div>
-                    <h4 class="fw-bold mb-1">Admin Panel</h4>
-                    <p class="text-muted mb-0 small">Manage reservations, inquiries, reports, and activity logs</p>
-                    </div>
-                </div>
-                <div class="admin-header-actions d-flex gap-2 flex-wrap align-items-center">
-                    <div class="dropdown">
-                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown">🔔 Notifications</button>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">2 new reservations</a></li>
-                            <li><a class="dropdown-item" href="#">1 new inquiry</a></li>
-                            <li><a class="dropdown-item" href="#">Package update pending</a></li>
-                        </ul>
-                    </div>
-                    <button class="btn btn-outline-secondary btn-sm" id="themeToggle">🌙 Dark Mode</button>
-                    <a href="{{ route('home') }}" class="btn btn-outline-secondary btn-sm">View Site</a>
-                    <form method="POST" action="{{ route('admin.logout') }}">@csrf<button class="btn btn-outline-danger btn-sm">Logout</button></form>
-                </div>
-            </header>
-
-            <div class="p-4">
-                @yield('content')
-            </div>
-        </main>
-    </div>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    const mobileMenu = document.getElementById('adminMobileMenu');
-    const navBackdrop = document.getElementById('adminNavBackdrop');
-    const closeMobileMenu = () => { document.body.classList.remove('mobile-admin-nav-open'); mobileMenu?.setAttribute('aria-expanded', 'false'); };
-    mobileMenu?.addEventListener('click', () => { const isOpen = document.body.classList.toggle('mobile-admin-nav-open'); mobileMenu.setAttribute('aria-expanded', String(isOpen)); });
-    navBackdrop?.addEventListener('click', closeMobileMenu);
-    document.querySelectorAll('.sidebar .nav-link').forEach(link => link.addEventListener('click', closeMobileMenu));
-    const themeToggle = document.getElementById('themeToggle');
-    const savedTheme = localStorage.getItem('admin-theme');
-    if (savedTheme === 'dark') {
-        document.body.classList.add('dark-mode');
-        themeToggle.textContent = '☀️ Light Mode';
-    }
-    themeToggle.addEventListener('click', () => {
-        document.body.classList.toggle('dark-mode');
-        const isDark = document.body.classList.contains('dark-mode');
-        localStorage.setItem('admin-theme', isDark ? 'dark' : 'light');
-        themeToggle.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
-    });
-</script>
-</body>
-</html>
+<div class="container-fluid"><div class="row min-vh-100">
+    <aside class="col-lg-3 col-xl-2 sidebar text-white p-0"><div class="brand d-flex align-items-center gap-3"><div class="brand-mark">3Y</div><div><h4 class="mb-1">3YOS</h4><div class="brand-subtitle">Operations</div></div></div><nav>
+        <div class="nav-caption">Workspace</div>
+        <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}"><span class="sidebar-icon">OV</span>Overview</a>
+        <a class="nav-link {{ request()->routeIs('admin.reservations') ? 'active' : '' }}" href="{{ route('admin.reservations') }}"><span class="sidebar-icon">BK</span>Reservations</a>
+        <a class="nav-link {{ request()->routeIs('admin.inquiries*') ? 'active' : '' }}" href="{{ route('admin.inquiries') }}"><span class="sidebar-icon">IN</span>Inquiries</a>
+        @if(session('admin_role') === 'full')
+        <div class="nav-caption mt-4">Content & insights</div>
+        <a class="nav-link {{ request()->routeIs('admin.packages.*') ? 'active' : '' }}" href="{{ route('admin.packages.index') }}"><span class="sidebar-icon">PK</span>Packages</a>
+        <a class="nav-link {{ request()->routeIs('admin.gallery.*') ? 'active' : '' }}" href="{{ route('admin.gallery.index') }}"><span class="sidebar-icon">GL</span>Gallery</a>
+        <a class="nav-link {{ request()->routeIs('admin.analytics') ? 'active' : '' }}" href="{{ route('admin.analytics') }}"><span class="sidebar-icon">AN</span>Analytics</a>
+        <a class="nav-link {{ request()->routeIs('admin.reports') ? 'active' : '' }}" href="{{ route('admin.reports') }}"><span class="sidebar-icon">RP</span>Reports</a>
+        <a class="nav-link {{ request()->routeIs('admin.users') ? 'active' : '' }}" href="{{ route('admin.users') }}"><span class="sidebar-icon">TM</span>Team admins</a>
+        <a class="nav-link {{ request()->routeIs('admin.activity-logs') ? 'active' : '' }}" href="{{ route('admin.activity-logs') }}"><span class="sidebar-icon">LG</span>Activity logs</a>
+        @endif
+        <div class="nav-caption mt-4">System</div><a class="nav-link {{ request()->routeIs('admin.backups') ? 'active' : '' }}" href="{{ route('admin.backups') }}"><span class="sidebar-icon">DB</span>Backups</a>
+    </nav></aside>
+    <main class="col-lg-9 col-xl-10 p-0"><header class="header-bar p-3 px-lg-4 d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3"><div class="admin-heading d-flex align-items-center gap-2"><button class="header-btn d-lg-none" type="button" id="adminMobileMenu" aria-expanded="false">Menu</button><div><div class="page-kicker">Catering management</div><h4 class="mb-0">Operations workspace</h4></div></div><div class="admin-header-actions d-flex gap-2 align-items-center"><button class="header-btn" id="themeToggle" type="button">Appearance</button><a href="{{ route('home') }}" class="header-btn text-center text-decoration-none">View website</a><form method="POST" action="{{ route('admin.logout') }}">@csrf<button class="btn btn-outline-danger btn-sm">Sign out</button></form></div></header><div class="p-3 p-lg-4">@yield('content')</div></main>
+</div></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script><script>const mobileMenu=document.getElementById('adminMobileMenu'),navBackdrop=document.getElementById('adminNavBackdrop'),closeMobileMenu=()=>{document.body.classList.remove('mobile-admin-nav-open');mobileMenu?.setAttribute('aria-expanded','false')};mobileMenu?.addEventListener('click',()=>{const isOpen=document.body.classList.toggle('mobile-admin-nav-open');mobileMenu.setAttribute('aria-expanded',String(isOpen))});navBackdrop?.addEventListener('click',closeMobileMenu);document.querySelectorAll('.sidebar .nav-link').forEach(link=>link.addEventListener('click',closeMobileMenu));const themeToggle=document.getElementById('themeToggle'),savedTheme=localStorage.getItem('admin-theme');if(savedTheme==='dark')document.body.classList.add('dark-mode');themeToggle?.addEventListener('click',()=>{document.body.classList.toggle('dark-mode');localStorage.setItem('admin-theme',document.body.classList.contains('dark-mode')?'dark':'light')});</script>
+</body></html>

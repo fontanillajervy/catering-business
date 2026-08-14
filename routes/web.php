@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminGalleryController;
+use App\Http\Controllers\AdminPackageController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BackupController;
@@ -26,6 +28,10 @@ Route::get('/contact', [PublicController::class, 'contact'])->name('contact');
 
 Route::get('/admin/login', [AuthController::class, 'showLoginForm'])->name('admin.login');
 Route::post('/admin/login', [AuthController::class, 'login'])->name('admin.login.post');
+Route::get('/admin/forgot-password', [AuthController::class, 'showForgotPasswordForm'])->middleware('guest')->name('password.request');
+Route::post('/admin/forgot-password', [AuthController::class, 'sendPasswordResetLink'])->middleware(['guest', 'throttle:3,10'])->name('password.email');
+Route::get('/admin/reset-password/{token}', [AuthController::class, 'showResetPasswordForm'])->middleware('guest')->name('password.reset');
+Route::post('/admin/reset-password', [AuthController::class, 'resetPassword'])->middleware(['guest', 'throttle:5,10'])->name('password.update');
 Route::post('/admin/logout', [AuthController::class, 'logout'])->name('admin.logout');
 
 Route::middleware(['ensure.admin', 'capture.activity'])->prefix('admin')->group(function () {
@@ -33,8 +39,13 @@ Route::middleware(['ensure.admin', 'capture.activity'])->prefix('admin')->group(
     Route::get('/reservations', [AdminController::class, 'reservations'])->name('admin.reservations');
     Route::patch('/reservations/{reservation}/status', [AdminController::class, 'updateReservationStatus'])->name('admin.reservations.status');
     Route::get('/inquiries', [AdminController::class, 'inquiries'])->name('admin.inquiries');
+    Route::get('/inquiries/{inquiry}', [AdminController::class, 'showInquiry'])->name('admin.inquiries.show');
+    Route::post('/inquiries/{inquiry}/reply', [AdminController::class, 'replyToInquiry'])->name('admin.inquiries.reply');
+    Route::delete('/inquiries/{inquiry}', [AdminController::class, 'destroyInquiry'])->name('admin.inquiries.destroy');
     Route::patch('/inquiries/{inquiry}/status', [AdminController::class, 'updateInquiryStatus'])->name('admin.inquiries.status');
     Route::middleware('ensure.full-admin')->group(function () {
+        Route::resource('packages', AdminPackageController::class)->except('show')->names('admin.packages');
+        Route::resource('gallery', AdminGalleryController::class)->except(['show', 'create', 'edit'])->names('admin.gallery');
         Route::get('/team-admins', [AdminUserController::class, 'index'])->name('admin.users');
         Route::post('/team-admins', [AdminUserController::class, 'store'])->name('admin.users.store');
         Route::get('/reports', [ReportController::class, 'index'])->name('admin.reports');
