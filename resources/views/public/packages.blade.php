@@ -17,6 +17,12 @@
         </div>
     </section>
 
+    <div class="row g-4 mb-5">
+        <div class="col-md-4"><div class="feature-box h-100"><div class="feature-icon">🍽️</div><h3>Custom menus</h3><p>Flexible menus built around your guests, your venue, and the feeling you want for your celebration.</p></div></div>
+        <div class="col-md-4"><div class="feature-box h-100"><div class="feature-icon">🎉</div><h3>Event-ready setup</h3><p>From elegant buffet lines to plated service, we handle the presentation and timing with care.</p></div></div>
+        <div class="col-md-4"><div class="feature-box h-100"><div class="feature-icon">🤝</div><h3>Planning support</h3><p>We help you tailor the package to your guest count, guest preferences, and event flow.</p></div></div>
+    </div>
+
     <div class="row g-4">
         @forelse($packages as $package)
             @php($tier = strtolower($package->name))
@@ -35,6 +41,34 @@
         @empty
             <div class="col-12"><div class="soft-card p-5 text-center"><h3 class="mb-2">Our packages are being prepared.</h3><p class="text-muted mb-0">Run the latest database migration to add Silver, Gold, Platinum, and Diamond packages.</p></div></div>
         @endforelse
+    </div>
+</section>
+
+<section class="py-5 py-lg-6 bg-paper">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <div class="eyebrow mb-2">Frequently asked</div>
+                <h2 class="section-title mb-4">Questions people ask before booking.</h2>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6"><div class="faq-item h-100"><h3>How far in advance should I book?</h3><p>We recommend booking at least 2–3 months ahead for weddings and larger celebrations, though we also accommodate shorter timelines when possible.</p></div></div>
+            <div class="col-md-6"><div class="faq-item h-100"><h3>Can you customize the menu?</h3><p>Yes. We can tailor each package based on your event style, guest preferences, and budget to create a menu that feels personal.</p></div></div>
+            <div class="col-md-6"><div class="faq-item h-100"><h3>Do you provide staffing and setup?</h3><p>Absolutely. We offer setup, service, and event support to help your celebration run smoothly.</p></div></div>
+            <div class="col-md-6"><div class="faq-item h-100"><h3>Do you handle smaller events too?</h3><p>Yes. We cater intimate family gatherings, birthdays, debuts, and private celebrations as well as larger events.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5 py-lg-6">
+    <div class="container">
+        <div class="cta-panel text-center">
+            <div class="eyebrow mb-2">Ready to plan?</div>
+            <h2 class="section-title mb-3">Let’s build the right fit for your event.</h2>
+            <p class="mb-4">Tell us what you’re planning and we’ll help recommend a package, menu, and service setup that matches your celebration.</p>
+            <div class="d-flex flex-column flex-sm-row justify-content-center gap-3"><a href="{{ route('inquiry') }}" class="btn btn-primary">Request a quote</a><a href="{{ route('reservation') }}" class="btn btn-outline-primary">Book a reservation</a></div>
+        </div>
     </div>
 </section>
 

@@ -22,7 +22,7 @@ class StoreInquiryRequest extends FormRequest
             'message' => ['required', 'string', 'max:2000'],
             'website' => ['prohibited'],
             'form_started' => ['required', 'integer'],
-            'captcha_answer' => ['required', 'integer', 'min:0', 'max:99'],
+            'g-recaptcha-response' => ['required', 'string'],
         ];
     }
 
@@ -33,7 +33,7 @@ class StoreInquiryRequest extends FormRequest
             'contact_number.required' => 'Please provide a contact number.',
             'email.required' => 'Please provide your email address.',
             'message.required' => 'Please share your inquiry details.',
-            'captcha_answer.required' => 'Please answer the security question.',
+            'g-recaptcha-response.required' => 'Please verify that you are not a robot.',
         ];
     }
 }

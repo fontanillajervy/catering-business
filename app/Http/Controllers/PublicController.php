@@ -49,30 +49,18 @@ class PublicController extends Controller
     {
         $this->ensureSignaturePackages();
         $packages = Package::orderBy('price')->get();
-        $captchaQuestion = $this->captchaQuestion();
 
-        return view('public.reservation', compact('packages', 'captchaQuestion'));
+        return view('public.reservation', compact('packages'));
     }
 
     public function inquiry()
     {
-        $captchaQuestion = $this->captchaQuestion();
-
-        return view('public.inquiry', compact('captchaQuestion'));
+        return view('public.inquiry');
     }
 
     public function contact()
     {
         return view('public.contact');
-    }
-
-    private function captchaQuestion(): string
-    {
-        $first = random_int(2, 9);
-        $second = random_int(1, 9);
-        session(['form_captcha_answer' => $first + $second]);
-
-        return "{$first} + {$second}";
     }
 
     private function ensureSignaturePackages(): void

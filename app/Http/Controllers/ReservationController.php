@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreReservationRequest;
 use App\Models\Client;
 use App\Models\Reservation;
+use ReCaptcha\ReCaptcha;
 
 class ReservationController extends Controller
 {
@@ -24,8 +25,12 @@ class ReservationController extends Controller
             return back()->withInput()->withErrors(['full_name' => 'Unable to submit this request. Please try again.']);
         }
 
-        if ((int) $request->input('captcha_answer') !== (int) session('form_captcha_answer')) {
-            return back()->withInput()->withErrors(['captcha_answer' => 'Please answer the security question correctly.']);
+        // Verify reCAPTCHA
+        $recaptcha = new ReCaptcha(config('services.recaptcha.secret_key'));
+        $resp = $recaptcha->verify($request->input('g-recaptcha-response'), $_SERVER['REMOTE_ADDR'] ?? '');
+        
+        if (!$resp->isSuccess()) {
+            return back()->withInput()->withErrors(['g-recaptcha-response' => 'Please verify that you are not a robot.']);
         }
 
         $bookings = Reservation::whereDate('event_date', $request->input('event_date'))
@@ -63,8 +68,6 @@ class ReservationController extends Controller
             'additional_notes' => $request->input('additional_notes'),
             'status' => 'pending',
         ]);
-
-        $request->session()->forget('form_captcha_answer');
 
         return redirect()->back()->with('success', 'Your reservation request has been received.');
     }

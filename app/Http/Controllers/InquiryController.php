@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreInquiryRequest;
 use App\Models\Inquiry;
+use ReCaptcha\ReCaptcha;
 
 class InquiryController extends Controller
 {
@@ -13,8 +14,12 @@ class InquiryController extends Controller
             return back()->withInput()->withErrors(['full_name' => 'Unable to submit this request. Please try again.']);
         }
 
-        if ((int) $request->input('captcha_answer') !== (int) session('form_captcha_answer')) {
-            return back()->withInput()->withErrors(['captcha_answer' => 'Please answer the security question correctly.']);
+        // Verify reCAPTCHA
+        $recaptcha = new ReCaptcha(config('services.recaptcha.secret_key'));
+        $resp = $recaptcha->verify($request->input('g-recaptcha-response'), $_SERVER['REMOTE_ADDR'] ?? '');
+        
+        if (!$resp->isSuccess()) {
+            return back()->withInput()->withErrors(['g-recaptcha-response' => 'Please verify that you are not a robot.']);
         }
 
         Inquiry::create([
@@ -25,8 +30,6 @@ class InquiryController extends Controller
             'category' => $request->input('category'),
             'message' => $request->input('message'),
         ]);
-
-        $request->session()->forget('form_captcha_answer');
 
         return redirect()->back()->with('success', 'Your inquiry has been sent.');
     }

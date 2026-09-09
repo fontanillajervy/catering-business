@@ -38,6 +38,8 @@ Route::middleware(['ensure.admin', 'capture.activity'])->prefix('admin')->group(
     Route::get('/', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::get('/reservations', [AdminController::class, 'reservations'])->name('admin.reservations');
     Route::patch('/reservations/{reservation}/status', [AdminController::class, 'updateReservationStatus'])->name('admin.reservations.status');
+    Route::post('/reservations/{reservation}/service-contract', [AdminController::class, 'uploadReservationContract'])->name('admin.reservations.contract');
+    Route::delete('/reservations/{reservation}/service-contract/{contract}', [AdminController::class, 'deleteReservationContract'])->name('admin.reservations.contract.delete');
     Route::get('/inquiries', [AdminController::class, 'inquiries'])->name('admin.inquiries');
     Route::get('/inquiries/{inquiry}', [AdminController::class, 'showInquiry'])->name('admin.inquiries.show');
     Route::post('/inquiries/{inquiry}/reply', [AdminController::class, 'replyToInquiry'])->name('admin.inquiries.reply');
@@ -48,6 +50,7 @@ Route::middleware(['ensure.admin', 'capture.activity'])->prefix('admin')->group(
         Route::resource('gallery', AdminGalleryController::class)->except(['show', 'create', 'edit'])->names('admin.gallery');
         Route::get('/team-admins', [AdminUserController::class, 'index'])->name('admin.users');
         Route::post('/team-admins', [AdminUserController::class, 'store'])->name('admin.users.store');
+        Route::put('/team-admins/{user}/reset-password', [AdminUserController::class, 'resetPassword'])->name('admin.users.reset');
         Route::get('/reports', [ReportController::class, 'index'])->name('admin.reports');
         Route::get('/reports/export/{type}', [ReportController::class, 'export'])->name('admin.reports.export');
         Route::get('/analytics', [AdminController::class, 'analytics'])->name('admin.analytics');

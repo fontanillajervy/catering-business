@@ -2,19 +2,21 @@
 
 @section('content')
 <div class="content-card p-4">
-    <div class="d-flex justify-content-between gap-3 mb-4">
+    <div class="d-flex flex-column flex-sm-row justify-content-between gap-3 mb-4">
         <div><h1 class="fw-bold mb-1">Packages</h1><p class="text-muted mb-0">Create, update, feature, or remove your catering packages.</p></div>
-        <a class="btn luxury-btn" href="{{ route('admin.packages.create') }}">Add package</a>
+        <a class="btn luxury-btn align-self-sm-start" href="{{ route('admin.packages.create') }}">Add package</a>
     </div>
     @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
     <div class="table-responsive"><table class="table table-hover align-middle mb-0">
-        <thead><tr><th>Package</th><th>Price / guest</th><th>Guest range</th><th>Featured</th><th class="text-end">Actions</th></tr></thead>
+        <thead><tr><th>Package</th><th>Price / guest</th><th class="d-none d-md-table-cell">Guest range</th><th class="d-none d-md-table-cell">Featured</th><th class="text-end">Actions</th></tr></thead>
         <tbody>
         @forelse($packages as $package)
             <tr>
-                <td><strong>{{ $package->name }}</strong><br><small class="text-muted">{{ str($package->description)->limit(65) }}</small></td>
-                <td>PHP {{ number_format($package->price, 2) }}</td><td>{{ $package->min_guests }} to {{ $package->max_guests }}</td><td>{{ $package->is_featured ? 'Yes' : 'No' }}</td>
-                <td class="text-end"><a class="btn btn-sm btn-outline-secondary" href="{{ route('admin.packages.edit', $package) }}">Edit</a><form class="d-inline" method="POST" action="{{ route('admin.packages.destroy', $package) }}" onsubmit="return confirm('Delete this package?');">@csrf @method('DELETE')<button class="btn btn-sm btn-outline-danger">Delete</button></form></td>
+                <td><strong>{{ $package->name }}</strong><br><small class="text-muted">{{ str($package->description)->limit(50) }}</small></td>
+                <td><span class="fw-bold">PHP {{ number_format($package->price, 2) }}</span></td>
+                <td class="d-none d-md-table-cell">{{ $package->min_guests }}-{{ $package->max_guests }}</td>
+                <td class="d-none d-md-table-cell"><span class="badge-soft">{{ $package->is_featured ? 'Featured' : 'Regular' }}</span></td>
+                <td class="text-end"><div class="btn-group btn-group-sm flex-column flex-md-row" role="group"><a class="btn btn-sm btn-outline-secondary" href="{{ route('admin.packages.edit', $package) }}">Edit</a><form class="d-inline" method="POST" action="{{ route('admin.packages.destroy', $package) }}" onsubmit="return confirm('Delete this package?');">@csrf @method('DELETE')<button class="btn btn-sm btn-outline-danger">Delete</button></form></div></td>
             </tr>
         @empty
             <tr><td colspan="5" class="text-center text-muted py-4">No packages yet.</td></tr>
@@ -22,4 +24,10 @@
         </tbody>
     </table></div>
 </div>
+<style>
+@media(max-width:768px){
+    .table td:last-child{display:flex;gap:.25rem;flex-direction:column}
+    .table td:last-child .btn{width:100%}
+}
+</style>
 @endsection

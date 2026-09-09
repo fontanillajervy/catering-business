@@ -23,11 +23,17 @@
             <div class="col-12"><label class="form-label">Additional services</label><textarea name="additional_services" class="form-control" rows="2">{{ old('additional_services') }}</textarea></div>
             <div class="col-12"><label class="form-label">Special requests</label><textarea name="special_requests" class="form-control" rows="2">{{ old('special_requests') }}</textarea></div>
             <div class="col-12"><label class="form-label">Additional notes</label><textarea name="additional_notes" class="form-control" rows="2">{{ old('additional_notes') }}</textarea></div>
-            <div class="col-md-6"><label class="form-label">Security question: {{ $captchaQuestion }} = ?</label><input type="number" name="captcha_answer" class="form-control" required><div class="form-text">This helps us block automated requests.</div></div>
+            <div class="col-12">
+                <div class="g-recaptcha" data-sitekey="{{ config('services.recaptcha.site_key') }}"></div>
+                @error('g-recaptcha-response')
+                    <div class="alert alert-danger mt-2">{{ $message }}</div>
+                @enderror
+            </div>
             <div class="col-12"><button type="submit" id="submit-reservation" class="btn btn-primary">Submit reservation request</button></div>
         </div>
     </form>
 </div></div></div></div>
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 <script>
 const dateInput=document.getElementById('event_date'), availability=document.getElementById('date-availability'), submitButton=document.getElementById('submit-reservation');
 dateInput.addEventListener('change', async () => { if (!dateInput.value) return; availability.textContent='Checking availability…'; submitButton.disabled=true; try { const response=await fetch(`{{ route('reservation.availability') }}?date=${encodeURIComponent(dateInput.value)}`); const data=await response.json(); if (data.available) { availability.textContent=`Available — ${data.remaining} event slot${data.remaining===1?'':'s'} remaining.`; availability.className='form-text text-success'; submitButton.disabled=false; } else { availability.textContent='This date is fully booked. Please choose another date.'; availability.className='form-text text-danger'; } } catch { availability.textContent='We could not check this date. Please try again.'; availability.className='form-text text-danger'; } });

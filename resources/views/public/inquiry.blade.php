@@ -30,7 +30,12 @@
                         <div class="col-md-6"><label class="form-label">Subject</label><input type="text" name="subject" class="form-control form-control-lg" required></div>
                         <div class="col-md-6"><label class="form-label">Category</label><select name="category" class="form-select form-select-lg" required><option value="">Select</option><option>General Inquiry</option><option>Reservation</option><option>Packages</option><option>Pricing</option><option>Custom Event</option><option>Others</option></select></div>
                         <div class="col-12"><label class="form-label">Message</label><textarea name="message" class="form-control" rows="5" required></textarea></div>
-                        <div class="col-md-6"><label class="form-label">Security question: {{ $captchaQuestion }} = ?</label><input type="number" name="captcha_answer" class="form-control" required><div class="form-text">This helps us block automated requests.</div></div>
+                        <div class="col-12">
+                            <div class="g-recaptcha" data-sitekey="{{ config('services.recaptcha.site_key') }}"></div>
+                            @error('g-recaptcha-response')
+                                <div class="alert alert-danger mt-2">{{ $message }}</div>
+                            @enderror
+                        </div>
                         <div class="col-12"><button type="submit" class="btn btn-primary px-4 py-2">Submit Inquiry</button></div>
                     </div>
                 </form>
@@ -38,4 +43,5 @@
         </div>
     </div>
 </div>
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 @endsection

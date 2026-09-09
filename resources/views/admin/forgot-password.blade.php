@@ -1,6 +1,23 @@
 @extends('layouts.app')
 
 @section('content')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .input-group .btn-outline-secondary {
+        border-left: 0;
+        padding: 0.76rem 0.85rem;
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+    .input-group .form-control:focus ~ .btn-outline-secondary {
+        border-color: #20201d;
+    }
+    @media (max-width: 576px) {
+        .col-md-7 {
+            padding: 0 1rem;
+        }
+    }
+</style>
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-lg-5 col-md-7">

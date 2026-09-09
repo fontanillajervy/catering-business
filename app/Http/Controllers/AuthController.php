@@ -55,12 +55,23 @@ class AuthController extends Controller
 
         $status = Password::sendResetLink($request->only('email'));
 
-        return back()->with(
-            $status === Password::RESET_LINK_SENT ? 'status' : 'error',
-            $status === Password::RESET_LINK_SENT
-                ? 'If that Team Admin email exists, a password reset link has been sent.'
-                : 'We could not send the reset link. Please try again shortly.'
-        );
+        if ($status !== Password::RESET_LINK_SENT) {
+            return back()->with('error', 'We could not send the reset link. Please try again shortly.');
+        }
+
+        $user = User::where('email', $request->email)->first();
+        $resetUrl = $user ? route('password.reset', ['token' => Password::broker()->createToken($user), 'email' => $user->email]) : null;
+
+        if (config('mail.default') === 'log' || config('mail.default') === 'array') {
+            return back()->with(
+                'status',
+                $resetUrl
+                    ? 'Development mode: password reset link generated successfully: ' . $resetUrl . ' (also written to the Laravel log).'
+                    : 'Password reset link generated successfully. Check the Laravel log for the full reset URL.'
+            );
+        }
+
+        return back()->with('status', 'If that Team Admin email exists, a password reset link has been sent.');
     }
 
     public function showResetPasswordForm(Request $request, string $token)

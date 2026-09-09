@@ -30,7 +30,7 @@ class StoreReservationRequest extends FormRequest
             'additional_notes' => ['nullable', 'string', 'max:1000'],
             'website' => ['prohibited'],
             'form_started' => ['required', 'integer'],
-            'captcha_answer' => ['required', 'integer', 'min:0', 'max:99'],
+            'g-recaptcha-response' => ['required', 'string'],
         ];
     }
 
@@ -42,7 +42,7 @@ class StoreReservationRequest extends FormRequest
             'email.required' => 'Please provide your email address.',
             'event_date.after_or_equal' => 'Event date must be today or later.',
             'guest_count.max' => 'Guest count cannot exceed 1000.',
-            'captcha_answer.required' => 'Please answer the security question.',
+            'g-recaptcha-response.required' => 'Please verify that you are not a robot.',
         ];
     }
 }

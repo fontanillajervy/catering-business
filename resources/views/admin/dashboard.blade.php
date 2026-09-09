@@ -15,5 +15,36 @@
     <div class="col-lg-7"><div class="card p-4 h-100"><div class="d-flex align-items-center justify-content-between mb-4"><div><h5 class="fw-bold mb-1">Priority workspace</h5><p class="text-muted small mb-0">Keep client communication and booking decisions moving.</p></div><span class="badge-soft">Today</span></div><div class="workflow-item"><div class="workflow-icon">01</div><div><strong>Review reservation requests</strong><p class="text-muted mb-0">Confirm availability, update status, and respond to event needs.</p></div><a href="{{ route('admin.reservations') }}">Open</a></div><div class="workflow-item"><div class="workflow-icon">02</div><div><strong>Reply to inquiries</strong><p class="text-muted mb-0">Give prospective clients a timely, helpful response.</p></div><a href="{{ route('admin.inquiries') }}">Open</a></div>@if(session('admin_role') === 'full')<div class="workflow-item"><div class="workflow-icon">03</div><div><strong>Keep packages current</strong><p class="text-muted mb-0">Update inclusions, pricing, and featured offerings.</p></div><a href="{{ route('admin.packages.index') }}">Manage</a></div>@endif</div></div>
     <div class="col-lg-5"><div class="card p-4 h-100"><h5 class="fw-bold mb-1">Quick actions</h5><p class="text-muted small mb-4">Frequently used management tools.</p><div class="d-grid gap-2"><a class="quick-link" href="{{ route('admin.inquiries') }}"><span>Client inquiries</span><b>→</b></a><a class="quick-link" href="{{ route('admin.reservations') }}"><span>Reservation calendar</span><b>→</b></a>@if(session('admin_role') === 'full')<a class="quick-link" href="{{ route('admin.packages.index') }}"><span>Package editor</span><b>→</b></a><a class="quick-link" href="{{ route('admin.analytics') }}"><span>Business analytics</span><b>→</b></a>@endif</div></div></div>
 </div>
-<style>.workflow-item{display:flex;align-items:center;gap:1rem;padding:1rem 0;border-top:1px solid var(--line)}.workflow-item:first-of-type{border-top:0}.workflow-icon{width:35px;height:35px;display:grid;place-items:center;border-radius:9px;background:var(--mint);color:var(--teal-dark);font-size:.7rem;font-weight:800}.workflow-item strong{font-size:.9rem}.workflow-item p{font-size:.8rem;margin-top:.15rem}.workflow-item a{margin-left:auto;color:var(--teal-dark);font-weight:800;text-decoration:none;font-size:.8rem}.quick-link{display:flex;justify-content:space-between;align-items:center;padding:.9rem 1rem;border:1px solid var(--line);border-radius:9px;color:var(--ink);font-weight:700;text-decoration:none;transition:.18s}.quick-link:hover{border-color:#9bd5cf;background:var(--mint);color:var(--teal-dark)}.quick-link b{font-size:1.1rem;color:var(--teal)}@media(max-width:575px){.workflow-item{align-items:flex-start}.workflow-item a{padding-top:.15rem}}</style>
+<style>
+.workflow-item{display:flex;align-items:center;gap:1rem;padding:1rem 0;border-top:1px solid var(--line)}
+.workflow-item:first-of-type{border-top:0}
+.workflow-icon{width:35px;height:35px;display:grid;place-items:center;border-radius:9px;background:var(--mint);color:var(--teal-dark);font-size:.7rem;font-weight:800}
+.workflow-item strong{font-size:.9rem}
+.workflow-item p{font-size:.8rem;margin-top:.15rem}
+.workflow-item a{margin-left:auto;color:var(--teal-dark);font-weight:800;text-decoration:none;font-size:.8rem}
+.quick-link{display:flex;justify-content:space-between;align-items:center;padding:.9rem 1rem;border:1px solid var(--line);border-radius:9px;color:var(--ink);font-weight:700;text-decoration:none;transition:.18s}
+.quick-link:hover{border-color:#9bd5cf;background:var(--mint);color:var(--teal-dark)}
+.quick-link b{font-size:1.1rem;color:var(--teal)}
+
+@media(max-width:992px){
+    .row.g-4 > [class*="col-"]{margin-bottom:1rem}
+}
+
+@media(max-width:768px){
+    .workflow-item{gap:.75rem;padding:.75rem 0}
+    .workflow-item strong{font-size:.85rem}
+    .workflow-item p{font-size:.75rem}
+    .workflow-item a{margin-left:0;margin-top:.5rem;font-size:.75rem}
+    .quick-link{padding:.75rem;font-size:.9rem}
+    .quick-link b{font-size:1rem}
+}
+
+@media(max-width:575px){
+    .workflow-item{align-items:flex-start;flex-direction:column}
+    .workflow-item a{width:100%;text-align:center;padding:.4rem;margin-left:0;margin-top:.5rem}
+    .quick-link{flex-direction:column;align-items:flex-start;padding:.6rem}
+    .quick-link b{align-self:flex-end;margin-top:.4rem;font-size:1rem}
+    .quick-link span{width:100%}
+}
+</style>
 @endsection

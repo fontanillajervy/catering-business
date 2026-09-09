@@ -22,8 +22,22 @@ class Reservation extends Model
         'additional_services',
         'special_requests',
         'additional_notes',
+        'service_contract',
+        'service_contracts',
         'status',
     ];
+
+    protected $casts = [
+        'service_contracts' => 'array',
+    ];
+
+    public function contractFiles(): array
+    {
+        return array_values(array_filter(array_merge(
+            $this->service_contract ? [$this->service_contract] : [],
+            $this->service_contracts ?? [],
+        )));
+    }
 
     public function client()
     {
