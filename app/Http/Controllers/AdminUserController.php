@@ -27,6 +27,7 @@ class AdminUserController extends Controller
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
+            'role' => 'limited',
         ]);
 
         return back()->with('success', 'Team admin created. They can manage reservations and inquiries but cannot view reports, analytics, or activity logs.');

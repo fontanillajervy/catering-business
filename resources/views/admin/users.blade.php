@@ -8,9 +8,10 @@
     </div>
 
     @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
+    @if($errors->any())<div class="alert alert-danger"><ul class="mb-0">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
 
     <div class="row g-4">
-        <div class="col-lg-5">
+        <div class="col-lg-12 col-xl-4">
             <div class="card p-4 h-100">
                 <h5 class="fw-bold mb-3">Add team admin</h5>
                 <form method="POST" action="{{ route('admin.users.store') }}">
@@ -39,11 +40,11 @@
                 </form>
             </div>
         </div>
-        <div class="col-lg-7">
+        <div class="col-lg-12 col-xl-8">
             <div class="card p-4 h-100">
                 <h5 class="fw-bold mb-3">Created team admins</h5>
                 <div class="table-responsive">
-                    <table class="table align-middle mb-0">
+                    <table class="table align-middle mb-0 team-admin-table">
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -60,18 +61,14 @@
                                     </td>
                                     <td class="d-none d-md-table-cell">{{ $user->email }}</td>
                                     <td class="d-none d-md-table-cell">
-                                        <div class="d-flex flex-column gap-2">
+                                        <div class="team-admin-access">
                                             <span class="badge-soft">Res. & Inquiries</span>
-                                            <form method="POST" action="{{ route('admin.users.reset', $user) }}" class="row g-2 align-items-center">
+                                            <form method="POST" action="{{ route('admin.users.reset', $user) }}" class="team-admin-reset-form">
                                                 @csrf
                                                 @method('PUT')
-                                                <div class="col-md-5">
-                                                    <input type="password" name="password" class="form-control form-control-sm" placeholder="New password" required minlength="8">
-                                                </div>
-                                                <div class="col-md-5">
-                                                    <input type="password" name="password_confirmation" class="form-control form-control-sm" placeholder="Confirm" required minlength="8">
-                                                </div>
-                                                <div class="col-md-2 d-grid">
+                                                <input type="password" name="password" class="form-control form-control-sm" placeholder="New password" required minlength="8">
+                                                <input type="password" name="password_confirmation" class="form-control form-control-sm" placeholder="Confirm" required minlength="8">
+                                                <div class="d-grid">
                                                     <button type="submit" class="btn btn-sm btn-outline-primary">Reset</button>
                                                 </div>
                                             </form>
@@ -100,10 +97,24 @@
         background: rgba(47, 170, 164, 0.12);
         color: #0d6efd;
     }
+    .team-admin-table { table-layout: fixed; min-width: 560px; }
+    .team-admin-table th, .team-admin-table td { padding: .65rem .7rem; }
+    .team-admin-table th:nth-child(1), .team-admin-table td:nth-child(1) { width: 20%; }
+    .team-admin-table th:nth-child(2), .team-admin-table td:nth-child(2) { width: 27%; }
+    .team-admin-table th:nth-child(3), .team-admin-table td:nth-child(3) { width: 53%; }
+    .team-admin-table td { vertical-align: top; }
+    .team-admin-table td:nth-child(2) { overflow-wrap: anywhere; }
+    .team-admin-access { display: grid; gap: .45rem; }
+    .team-admin-reset-form { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; gap: .35rem; align-items: center; }
+    .team-admin-reset-form .form-control { padding: .4rem .55rem; font-size: .78rem; }
+    .team-admin-reset-form .btn { padding: .4rem .6rem; font-size: .78rem; }
+    .team-admin-reset-form .form-control { min-width: 0; }
+    .team-admin-reset-form .btn { white-space: nowrap; }
     @media(max-width:768px){
         .row.g-4{gap:1rem!important}
         .card{margin-bottom:1rem}
         .table-responsive{overflow-x:auto}
+        .team-admin-table { min-width: 560px; }
     }
     @media(max-width:576px){
         .card{padding:.75rem!important}
