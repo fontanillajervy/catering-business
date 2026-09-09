@@ -6,6 +6,19 @@ use Illuminate\Support\Facades\DB;
 
 class BackupService
 {
+    private const TABLES = [
+        'users',
+        'services',
+        'packages',
+        'clients',
+        'reservations',
+        'inquiries',
+        'activity_logs',
+        'settings',
+        'notification_templates',
+        'gallery_items',
+    ];
+
     public function create(): string
     {
         $filename = 'backup-' . now()->format('YmdHis') . '.json';
@@ -14,10 +27,9 @@ class BackupService
             mkdir(dirname($path), 0755, true);
         }
 
-        $tables = ['clients', 'packages', 'services', 'reservations', 'inquiries', 'settings', 'notification_templates'];
         $contents = ['created_at' => now()->toIso8601String(), 'tables' => []];
 
-        foreach ($tables as $table) {
+        foreach (self::TABLES as $table) {
             $contents['tables'][$table] = DB::table($table)->get()->map(fn ($row) => (array) $row)->all();
         }
 
@@ -26,9 +38,82 @@ class BackupService
         return $path;
     }
 
-    public function restore(string $backup): bool
+    public function restore(string $backup): int
     {
-        return true;
+        $path = $this->pathFor($backup);
+        $contents = json_decode(file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
+        $tables = $contents['tables'] ?? null;
+
+        if (! is_array($tables)) {
+            throw new \RuntimeException('The selected backup has an invalid format.');
+        }
+
+        $restoreTables = array_values(array_intersect(self::TABLES, array_keys($tables)));
+        $restoredRows = 0;
+        $driver = DB::getDriverName();
+
+        $this->disableForeignKeys($driver);
+
+        try {
+            DB::transaction(function () use ($restoreTables, $tables, &$restoredRows): void {
+                foreach (array_reverse($restoreTables) as $table) {
+                    DB::table($table)->truncate();
+                }
+
+                foreach ($restoreTables as $table) {
+                    $rows = $tables[$table];
+                    if (! is_array($rows)) {
+                        throw new \RuntimeException("Invalid data for {$table}.");
+                    }
+
+                    foreach (array_chunk($rows, 500) as $chunk) {
+                        if ($chunk !== []) {
+                            DB::table($table)->insert($chunk);
+                            $restoredRows += count($chunk);
+                        }
+                    }
+                }
+            });
+        } finally {
+            $this->enableForeignKeys($driver);
+        }
+
+        return $restoredRows;
+    }
+
+    public function pathFor(string $backup): string
+    {
+        if ($backup === basename($backup) && str_ends_with($backup, '.json')) {
+            $path = storage_path('app/backups/' . $backup);
+            if (is_file($path)) {
+                return $path;
+            }
+        }
+
+        throw new \InvalidArgumentException('Invalid backup file.');
+    }
+
+    public function delete(string $backup): void
+    {
+        unlink($this->pathFor($backup));
+    }
+
+    private function disableForeignKeys(string $driver): void
+    {
+        if ($driver === 'sqlite') {
+            DB::statement('PRAGMA foreign_keys = OFF');
+        } elseif ($driver === 'mysql') {
+            DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        }
+    }
+
+    private function enableForeignKeys(string $driver): void
+    {
+        if ($driver === 'sqlite') {
+            DB::statement('PRAGMA foreign_keys = ON');
+        } elseif ($driver === 'mysql') {
+            DB::statement('SET FOREIGN_KEY_CHECKS=1');
+        }
     }
 
     public function listBackups(): array
