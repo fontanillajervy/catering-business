@@ -19,7 +19,7 @@
                         <li class="mb-2"><span class="badge-soft me-2">Inquiries</span> <strong>{{ $summary['inquiry_count'] }}</strong></li>
                         <li class="mb-3"><span class="badge-soft me-2">Est. Revenue</span> <strong>₱{{ number_format($summary['estimated_revenue'], 2) }}</strong></li>
                     </ul>
-                    <a class="btn btn-outline-secondary w-100" href="{{ route('admin.reports.export', ['type' => 'csv']) }}">Download CSV</a>
+                    <a class="btn btn-outline-secondary w-100" href="{{ route('admin.reports.export', ['period' => $key]) }}">Download CSV</a>
                 </div>
             </div>
         @endforeach

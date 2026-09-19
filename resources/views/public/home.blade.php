@@ -29,6 +29,41 @@
 
 <section class="py-5 py-lg-5 bg-paper">
     <div class="container">
+        <div class="row g-4 home-metrics">
+            <div class="col-6 col-md-3">
+                <div class="metric-card">
+                    <div class="metric-value">1500+</div>
+                    <div class="metric-label">events hosted</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="metric-card">
+                    <div class="metric-value">12 yrs</div>
+                    <div class="metric-label">experience</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="metric-card">
+                    <div class="metric-value">24/7</div>
+                    <div class="metric-label">planning support</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="metric-card">
+                    <div class="metric-value">4.9/5</div>
+                    <div class="metric-label">client rating</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5 py-lg-5">
+    <div class="container">
+        <div class="section-heading text-center mb-4">
+            <div class="eyebrow mb-2">Why clients choose us</div>
+            <h2 class="section-title mb-3">Thoughtful service, beautifully executed.</h2>
+        </div>
         <div class="row g-4">
             <div class="col-md-4">
                 <article class="service-tile h-100">
@@ -55,6 +90,48 @@
     </div>
 </section>
 
+<section class="py-5 py-lg-5 bg-paper">
+    <div class="container">
+        <div class="row g-5 align-items-center">
+            <div class="col-lg-6">
+                <div class="eyebrow mb-2">How it works</div>
+                <h2 class="section-title mb-3">A smoother event planning process.</h2>
+                <div class="process-list">
+                    <div class="process-item">
+                        <span>1</span>
+                        <div>
+                            <strong>Share your vision</strong>
+                            <p>Tell us your event type, guest count, budget, and preferred mood.</p>
+                        </div>
+                    </div>
+                    <div class="process-item">
+                        <span>2</span>
+                        <div>
+                            <strong>We recommend a package</strong>
+                            <p>We match your needs with a proposal that feels practical and polished.</p>
+                        </div>
+                    </div>
+                    <div class="process-item">
+                        <span>3</span>
+                        <div>
+                            <strong>Enjoy a stress-free event</strong>
+                            <p>From setup to service, we handle the details so you can relax.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="mini-cta">
+                    <div class="eyebrow mb-2">Need a custom touch?</div>
+                    <h3>We can build a menu around your event.</h3>
+                    <p>Perfect for weddings, milestones, and gatherings that deserve a tailored plan.</p>
+                    <a href="{{ route('inquiry') }}" class="btn btn-primary">Send an inquiry</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <section class="py-5 py-lg-5">
     <div class="container">
         <div class="cta-panel text-center">
@@ -74,25 +151,37 @@
     .hero{background:linear-gradient(115deg,#f5eee3 0%,#fbf8f2 60%,#e8d9c6 100%)}
     .hero-title{font-size:clamp(2.8rem,5vw,4.8rem);line-height:.98;letter-spacing:-.045em;max-width:700px}
     .hero-copy{color:#625e57;font-size:1.08rem;line-height:1.7;max-width:560px}
-    .hero-art{min-height:390px;position:relative;overflow:hidden;background:radial-gradient(circle at 40% 25%,#e8bd78 0 10%,transparent 10.5%),radial-gradient(circle at 70% 75%,#ac5e3f 0 17%,transparent 17.5%),linear-gradient(145deg,#7c3d2d,#d38a5e);box-shadow:18px 18px 0 #ded2c0}
+    .hero-art{min-height:390px;position:relative;overflow:hidden;background:radial-gradient(circle at 40% 25%,#e8bd78 0 10%,transparent 10.5%),radial-gradient(circle at 70% 75%,#ac5e3f 0 17%,transparent 17.5%),linear-gradient(145deg,#7c3d2d,#d38a5e);box-shadow:18px 18px 0 #ded2c0;border-radius:26px}
     .hero-art:before,.hero-art:after{content:'';position:absolute;border:1px solid rgba(255,255,255,.45);border-radius:50%}
     .hero-art:before{width:315px;height:315px;top:35px;left:48px}
     .hero-art:after{width:210px;height:210px;bottom:-65px;right:-35px}
     .hero-art__label{position:absolute;z-index:1;bottom:28px;left:28px;color:#fff}
     .hero-art__label span{display:block;font-size:.7rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;margin-bottom:.45rem}
     .hero-art__label strong{font-family:'Playfair Display',serif;font-size:1.65rem;line-height:1.1}
-    .service-tile{padding:2rem;border:1px solid var(--line);background:var(--paper)}
+    .home-metrics{margin-top:-1.25rem}
+    .metric-card{background:#f9f1e8;border:1px solid rgba(109,48,36,.08);border-radius:18px;padding:1rem 1rem .9rem;text-align:center;box-shadow:0 10px 28px rgba(32,32,29,.04)}
+    .metric-value{font-weight:800;font-size:clamp(1.5rem,2vw,2.1rem);color:var(--wine);font-family:'Playfair Display',Georgia,serif}
+    .metric-label{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:.25rem}
+    .service-tile{padding:2rem;border:1px solid rgba(109,48,36,.08);background:#f9f2ea;border-radius:22px;box-shadow:0 10px 28px rgba(109,48,36,.04)}
     .service-number{font-size:.75rem;font-weight:800;color:var(--terracotta);letter-spacing:.14em;margin-bottom:2rem}
     .service-tile h3{font-size:1.5rem}
     .service-tile p{color:var(--muted);line-height:1.65;margin-bottom:0}
+    .process-list{display:grid;gap:1rem}
+    .process-item{display:flex;gap:1rem;padding:1rem 1.1rem;border:1px solid rgba(109,48,36,.08);border-radius:18px;background:#f8efe6}
+    .process-item span{display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border-radius:50%;background:var(--wine);color:#fff;font-weight:800}
+    .process-item strong{display:block;margin-bottom:.3rem}
+    .process-item p{margin:0;color:var(--muted);line-height:1.6}
+    .mini-cta{padding:2rem;border-radius:24px;background:linear-gradient(145deg,#f3e7d9,#f8f0ea);border:1px solid rgba(109,48,36,.08)}
+    .mini-cta h3{font-size:clamp(1.7rem,2vw,2.4rem);line-height:1.1;margin-bottom:.75rem}
+    .mini-cta p{color:var(--muted);line-height:1.7;margin-bottom:1.25rem}
     .occasion-panel{padding:clamp(2rem,4vw,4rem);background:#ece3d5}
     .check-list{list-style:none;padding:0}
     .check-list li{padding:1rem 0;border-bottom:1px solid rgba(109,48,36,.16);font-weight:700}
     .check-list li:last-child{border-bottom:0}
     .check-list span{display:inline-grid;place-items:center;width:22px;height:22px;margin-right:.75rem;border-radius:50%;background:rgba(109,48,36,.08);color:var(--wine);font-size:.75rem}
     .section-title{font-size:clamp(2.1rem,3.4vw,3rem);line-height:1.08;letter-spacing:-.03em}
-    .cta-panel{padding:2.5rem 1.5rem;border:1px solid var(--line);background:rgba(255,255,255,.6)}
-    @media(max-width:575px){.hero-art{min-height:280px}.hero-title{font-size:2.5rem}.cta-panel{padding:2rem 1rem}}
+    .cta-panel{padding:2.5rem 1.5rem;border:1px solid rgba(109,48,36,.08);background:linear-gradient(140deg,#f9f3ed,#f4e7d8);border-radius:22px}
+    @media(max-width:575px){.hero-art{min-height:280px}.hero-title{font-size:2.5rem}.cta-panel{padding:2rem 1rem}.process-item{padding:.85rem .9rem}.metric-card{padding:.8rem .7rem}}
 </style>
 @endsection
 

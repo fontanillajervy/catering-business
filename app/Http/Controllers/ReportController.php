@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Services\ReportService;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Storage;
 
 class ReportController extends Controller
 {
@@ -18,28 +17,47 @@ class ReportController extends Controller
         return view('admin.reports', compact('daily', 'weekly', 'monthly', 'yearly'));
     }
 
-    public function export(string $type)
+    public function export(ReportService $reportService = null, string $period = 'daily')
     {
-        $content = match ($type) {
-            'csv' => $this->buildCsv(),
-            default => 'Unsupported export type.'
-        };
+        $reportService ??= app(ReportService::class);
+        $period = strtolower($period);
 
-        $filename = 'reports-' . now()->format('YmdHis') . '.csv';
-        $path = storage_path('app/' . $filename);
-        file_put_contents($path, $content);
+        if (! in_array($period, ['daily', 'weekly', 'monthly', 'yearly'], true)) {
+            abort(404);
+        }
 
-        return response()->download($path, $filename)->deleteFileAfterSend(true);
+        $summary = $reportService->getSummary($period);
+        $filename = 'report-' . $period . '-' . now()->format('YmdHis') . '.csv';
+        $csv = $this->buildCsv($summary, $period);
+
+        return response($csv, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
     }
 
-    protected function buildCsv(): string
+    protected function buildCsv(array $summary, string $period): string
     {
         $rows = [
-            ['Type', 'Value'],
-            ['Reservations', \App\Models\Reservation::count()],
-            ['Inquiries', \App\Models\Inquiry::count()],
+            ['Period', ucfirst($period)],
+            ['Reservations', $summary['reservation_count']],
+            ['Confirmed Reservations', $summary['confirmed_reservations']],
+            ['Completed Events', $summary['completed_events']],
+            ['Cancelled Reservations', $summary['cancelled_reservations']],
+            ['Inquiries', $summary['inquiry_count']],
+            ['Estimated Revenue', $summary['estimated_revenue']],
         ];
 
-        return implode(PHP_EOL, array_map(fn ($row) => implode(',', $row), $rows));
+        $handle = fopen('php://temp', 'r+');
+
+        foreach ($rows as $row) {
+            fputcsv($handle, $row);
+        }
+
+        rewind($handle);
+        $csv = stream_get_contents($handle);
+        fclose($handle);
+
+        return $csv !== false ? $csv : '';
     }
 }

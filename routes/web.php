@@ -53,7 +53,7 @@ Route::middleware(['ensure.admin', 'capture.activity'])->prefix('admin')->group(
         Route::post('/team-admins', [AdminUserController::class, 'store'])->name('admin.users.store');
         Route::put('/team-admins/{user}/reset-password', [AdminUserController::class, 'resetPassword'])->name('admin.users.reset');
         Route::get('/reports', [ReportController::class, 'index'])->name('admin.reports');
-        Route::get('/reports/export/{type}', [ReportController::class, 'export'])->name('admin.reports.export');
+        Route::get('/reports/export/{period}', [ReportController::class, 'export'])->whereIn('period', ['daily', 'weekly', 'monthly', 'yearly'])->name('admin.reports.export');
         Route::get('/analytics', [AdminController::class, 'analytics'])->name('admin.analytics');
         Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('admin.activity-logs');
     });

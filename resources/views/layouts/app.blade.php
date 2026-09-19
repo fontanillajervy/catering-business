@@ -16,7 +16,9 @@
         h1,h2,h3,h4,h5,.display-font{font-family:'Playfair Display',Georgia,serif}
         a{text-decoration:none}
         .navbar{background:rgba(255,253,249,.94)!important;border-bottom:1px solid rgba(32,32,29,.07);backdrop-filter:blur(14px)}
-        .navbar-brand{color:var(--wine)!important;font-family:'Playfair Display',Georgia,serif;font-size:1.4rem;font-weight:800;letter-spacing:.02em}
+        .navbar-brand{display:inline-flex;align-items:center;gap:.75rem;color:var(--wine)!important;font-family:'Playfair Display',Georgia,serif;font-size:1.4rem;font-weight:800;letter-spacing:.02em}
+        .navbar-brand-text{display:flex;flex-direction:column;line-height:1.05}
+        .navbar-brand-text small{font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-family:'DM Sans',sans-serif;font-weight:700}
         .nav-link{color:var(--ink)!important;font-size:.9rem;font-weight:600;padding:.8rem .85rem!important}
         .nav-link:hover,.nav-link.active{color:var(--terracotta)!important}
         .btn{border-radius:999px;font-weight:700;font-size:.88rem;letter-spacing:.02em;padding:.76rem 1.35rem;transition:.2s ease}
@@ -25,7 +27,7 @@
         .btn-outline-primary{color:var(--wine);border-color:var(--wine)}
         .btn-outline-primary:hover{background:var(--wine);border-color:var(--wine)}
         .eyebrow{color:var(--terracotta);font-size:.75rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
-        .theme-toggle{border:1px solid var(--line);background:transparent;color:var(--ink);padding:.48rem .7rem;font-size:.78rem;font-weight:700;border-radius:999px}
+        .theme-toggle{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);background:transparent;color:var(--ink);padding:.48rem .7rem;font-size:.78rem;font-weight:700;border-radius:999px;min-width:42px;min-height:42px;line-height:1}
         .footer{margin-top:3rem;background:#211b18;color:#f6f0e8;padding-top:2rem;padding-bottom:1.25rem}
         .footer a{color:#f6f0e8;text-decoration:none}
         .footer a:hover{color:#e7b77a}
@@ -41,9 +43,23 @@
         body.dark-mode{--ink:#f5f1e9;--muted:#c9c3b9;--cream:#151515;--paper:#201f1d;--line:#575148;--wine:#e6ad92;--terracotta:#edb18f;--gold:#e7bd72;background:var(--cream);color:var(--ink)}
         body.dark-mode .navbar{background:rgba(27,26,24,.95)!important;border-color:#403c35}
         body.dark-mode .navbar-brand,body.dark-mode .nav-link,body.dark-mode .theme-toggle{color:#f5f1e9!important}
-        body.dark-mode .form-card,body.dark-mode .service-tile,body.dark-mode .process-card,body.dark-mode .cta-panel,body.dark-mode .occasion-panel{background:#201f1d!important;color:#f5f1e9}
+        body.dark-mode .theme-toggle{background:#2a2724;border-color:#575148}
+        body.dark-mode .hero{background:linear-gradient(115deg,#1b1714 0%,#2a241f 55%,#221d1a 100%)!important}
+        body.dark-mode .hero-copy{color:#d8d0c5!important}
+        body.dark-mode main,body.dark-mode .bg-paper,body.dark-mode .section-heading,body.dark-mode .card,body.dark-mode .form-card,body.dark-mode .service-tile,body.dark-mode .process-card,body.dark-mode .cta-panel,body.dark-mode .occasion-panel,body.dark-mode .metric-card,body.dark-mode .mini-cta,body.dark-mode .reservation-sidebar,body.dark-mode .reservation-tile,body.dark-mode .process-item{background:#201f1d!important;color:#f5f1e9!important}
+        body.dark-mode .card p,body.dark-mode .card h1,body.dark-mode .card h2,body.dark-mode .card h3,body.dark-mode .card h4,body.dark-mode .card h5,body.dark-mode .process-item strong,body.dark-mode .process-item p,body.dark-mode .service-tile h3,body.dark-mode .service-tile p,body.dark-mode .mini-cta h3,body.dark-mode .mini-cta p,body.dark-mode .reservation-checklist li,body.dark-mode .reservation-tile p,body.dark-mode .form-label,body.dark-mode .text-muted,body.dark-mode .eyebrow{color:#f5f1e9!important}
         body.dark-mode .form-control,body.dark-mode .form-select{background:#151515;border-color:#555047;color:#f5f1e9}
-        body.dark-mode .text-muted{color:var(--muted)!important}
+        body.dark-mode .form-text,body.dark-mode .date-availability{color:var(--muted)!important}
+        body.dark-mode .date-availability.text-success{color:#8fe3aa!important}
+        body.dark-mode .date-availability.text-danger{color:#ff9b9b!important}
+        body.dark-mode .btn-outline-primary{color:#f5f1e9;border-color:#d9b18f;background:transparent}
+        body.dark-mode .btn-outline-primary:hover{background:#d9b18f;color:#1b1714}
+        body.dark-mode .btn-primary{background:#d79c6a;border-color:#d79c6a;color:#1b1714}
+        body.dark-mode .footer{background:#0f0d0c}
+        body.dark-mode .footer a,body.dark-mode .footer p,body.dark-mode .footer small,body.dark-mode .footer span{color:#f3ebdf!important}
+        body.dark-mode .footer-contact-icon{border-color:rgba(231,183,122,.8);color:#e7b77a}
+        body.dark-mode .card,body.dark-mode .process-item{border-color:#403b36!important}
+        body.dark-mode .navbar-toggler-icon{filter:invert(1)}
     </style>
 </head>
 <body>
@@ -51,6 +67,10 @@
         <div class="container">
             <a class="navbar-brand" href="{{ route('home') }}">
                 <img src="{{ request()->getBaseUrl() }}/images/logo-transparent.png" alt="3YOS Catering Services" style="height:48px;width:auto;object-fit:contain;border-radius:50%;background:transparent">
+                <span class="navbar-brand-text">
+                    <span>3YOS</span>
+                    <small>Catering</small>
+                </span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
                 <span class="navbar-toggler-icon"></span>
@@ -63,6 +83,7 @@
                     <li class="nav-item"><a class="nav-link {{ request()->routeIs('packages*') ? 'active' : '' }}" href="{{ route('packages') }}">Packages</a></li>
                     <li class="nav-item"><a class="nav-link {{ request()->routeIs('gallery') ? 'active' : '' }}" href="{{ route('gallery') }}">Gallery</a></li>
                     <li class="nav-item"><a class="nav-link {{ request()->routeIs('reservation.status') ? 'active' : '' }}" href="{{ route('reservation.status') }}">Status</a></li>
+                    <li class="nav-item"><a class="nav-link {{ request()->routeIs('inquiry') ? 'active' : '' }}" href="{{ route('inquiry') }}">Inquiry</a></li>
                     <li class="nav-item ms-lg-2"><button type="button" class="theme-toggle" id="customerThemeToggle" aria-label="Enable dark mode" title="Enable dark mode"><span aria-hidden="true">&#9790;</span></button></li>
                     <li class="nav-item ms-lg-2"><a class="btn btn-primary" href="{{ route('reservation') }}">Book an event</a></li>
                 </ul>
