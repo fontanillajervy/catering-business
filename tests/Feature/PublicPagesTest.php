@@ -139,4 +139,170 @@ class PublicPagesTest extends TestCase
         $this->assertSame(17000.0, (float) $reservation->fresh()->balance);
         $this->assertNotNull($response);
     }
+
+    public function test_admin_reservations_can_be_filtered_by_status_and_payment_status(): void
+    {
+        \App\Models\Reservation::create([
+            'package_id' => 1,
+            'full_name' => 'Alice Client',
+            'contact_number' => '09171234567',
+            'email' => 'alice@example.com',
+            'address' => '123 Alice St',
+            'event_type' => 'Wedding',
+            'event_date' => now()->addDays(4)->toDateString(),
+            'event_time' => '18:00',
+            'venue' => 'Alice Venue',
+            'guest_count' => 80,
+            'estimated_budget' => 20000,
+            'status' => 'confirmed',
+            'payment_status' => 'Downpayment',
+            'payment_type' => 'Downpayment',
+            'amount_paid' => 6000,
+            'balance' => 14000,
+            'reservation_code' => 'RES-FILT-001',
+        ]);
+
+        \App\Models\Reservation::create([
+            'package_id' => 1,
+            'full_name' => 'Bob Client',
+            'contact_number' => '09181234567',
+            'email' => 'bob@example.com',
+            'address' => '456 Bob St',
+            'event_type' => 'Birthday',
+            'event_date' => now()->addDays(7)->toDateString(),
+            'event_time' => '17:00',
+            'venue' => 'Bob Venue',
+            'guest_count' => 50,
+            'estimated_budget' => 12000,
+            'status' => 'pending',
+            'payment_status' => 'Unpaid',
+            'payment_type' => 'Unpaid',
+            'amount_paid' => 0,
+            'balance' => 12000,
+            'reservation_code' => 'RES-FILT-002',
+        ]);
+
+        $request = new \Illuminate\Http\Request([
+            'status' => 'confirmed',
+            'payment_status' => 'Downpayment',
+        ]);
+
+        $response = app(\App\Http\Controllers\AdminController::class)->reservations($request);
+        $data = $response->getData(true);
+
+        $this->assertCount(1, $data['reservations']);
+        $this->assertSame('Alice Client', $data['reservations'][0]->full_name);
+        $this->assertSame('confirmed', $data['filterStatus']);
+        $this->assertSame('Downpayment', $data['filterPaymentStatus']);
+    }
+
+    public function test_admin_reservations_can_be_filtered_by_date_range_and_customer_search(): void
+    {
+        \App\Models\Reservation::create([
+            'package_id' => 1,
+            'full_name' => 'Alice Client',
+            'contact_number' => '09170000001',
+            'email' => 'alice@example.com',
+            'address' => '123 Alice St',
+            'event_type' => 'Wedding',
+            'event_date' => now()->addDays(4)->toDateString(),
+            'event_time' => '18:00',
+            'venue' => 'Alice Venue',
+            'guest_count' => 80,
+            'estimated_budget' => 20000,
+            'status' => 'confirmed',
+            'payment_status' => 'Downpayment',
+            'payment_type' => 'Downpayment',
+            'amount_paid' => 3000,
+            'balance' => 17000,
+            'reservation_code' => 'RES-FILT-SEARCH-001',
+        ]);
+
+        \App\Models\Reservation::create([
+            'package_id' => 1,
+            'full_name' => 'Bob Client',
+            'contact_number' => '09180000002',
+            'email' => 'bob@example.com',
+            'address' => '456 Bob St',
+            'event_type' => 'Birthday',
+            'event_date' => now()->addDays(15)->toDateString(),
+            'event_time' => '17:00',
+            'venue' => 'Bob Venue',
+            'guest_count' => 50,
+            'estimated_budget' => 12000,
+            'status' => 'pending',
+            'payment_status' => 'Unpaid',
+            'payment_type' => 'Unpaid',
+            'amount_paid' => 0,
+            'balance' => 12000,
+            'reservation_code' => 'RES-FILT-SEARCH-002',
+        ]);
+
+        $request = new \Illuminate\Http\Request([
+            'search' => 'alice',
+            'date_from' => now()->addDays(3)->toDateString(),
+            'date_to' => now()->addDays(10)->toDateString(),
+        ]);
+
+        $response = app(\App\Http\Controllers\AdminController::class)->reservations($request);
+        $data = $response->getData(true);
+
+        $this->assertCount(1, $data['reservations']);
+        $this->assertSame('Alice Client', $data['reservations'][0]->full_name);
+        $this->assertSame('alice', $data['search']);
+        $this->assertSame(now()->addDays(3)->toDateString(), $data['dateFrom']);
+    }
+
+    public function test_admin_reservations_export_uses_filtered_results(): void
+    {
+        \App\Models\Reservation::create([
+            'package_id' => 1,
+            'full_name' => 'Alice Client',
+            'contact_number' => '09170000003',
+            'email' => 'alice@example.com',
+            'address' => '123 Alice St',
+            'event_type' => 'Wedding',
+            'event_date' => now()->addDays(4)->toDateString(),
+            'event_time' => '18:00',
+            'venue' => 'Alice Venue',
+            'guest_count' => 80,
+            'estimated_budget' => 20000,
+            'status' => 'confirmed',
+            'payment_status' => 'Fully Paid',
+            'payment_type' => 'Full Payment',
+            'amount_paid' => 20000,
+            'balance' => 0,
+            'reservation_code' => 'RES-FILT-EXPORT-001',
+        ]);
+
+        \App\Models\Reservation::create([
+            'package_id' => 1,
+            'full_name' => 'Bob Client',
+            'contact_number' => '09180000004',
+            'email' => 'bob@example.com',
+            'address' => '456 Bob St',
+            'event_type' => 'Birthday',
+            'event_date' => now()->addDays(12)->toDateString(),
+            'event_time' => '17:00',
+            'venue' => 'Bob Venue',
+            'guest_count' => 50,
+            'estimated_budget' => 12000,
+            'status' => 'pending',
+            'payment_status' => 'Unpaid',
+            'payment_type' => 'Unpaid',
+            'amount_paid' => 0,
+            'balance' => 12000,
+            'reservation_code' => 'RES-FILT-EXPORT-002',
+        ]);
+
+        $response = app(\App\Http\Controllers\AdminController::class)->exportReservationsCsv(new \Illuminate\Http\Request([
+            'status' => 'confirmed',
+            'search' => 'alice',
+        ]));
+
+        $csv = $response->getContent();
+
+        $this->assertStringContainsString('RES-FILT-EXPORT-001', $csv);
+        $this->assertStringNotContainsString('RES-FILT-EXPORT-002', $csv);
+    }
 }

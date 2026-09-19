@@ -14,6 +14,46 @@
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
+    <form method="GET" action="{{ route('admin.reservations') }}" class="row g-3 align-items-end mb-4">
+        <div class="col-md-4 col-xl-3">
+            <label class="form-label fw-semibold mb-1">Customer</label>
+            <input type="text" name="search" class="form-control" value="{{ old('search', $search ?? '') }}" placeholder="Name, email, phone, code">
+        </div>
+        <div class="col-md-3 col-xl-2">
+            <label class="form-label fw-semibold mb-1">From date</label>
+            <input type="date" name="date_from" class="form-control" value="{{ old('date_from', $dateFrom ?? '') }}">
+        </div>
+        <div class="col-md-3 col-xl-2">
+            <label class="form-label fw-semibold mb-1">To date</label>
+            <input type="date" name="date_to" class="form-control" value="{{ old('date_to', $dateTo ?? '') }}">
+        </div>
+        <div class="col-md-4 col-xl-2">
+            <label class="form-label fw-semibold mb-1">Reservation status</label>
+            <select name="status" class="form-select">
+                <option value="">All statuses</option>
+                <option value="pending" @selected($status === 'pending')>Pending</option>
+                <option value="confirmed" @selected($status === 'confirmed')>Accepted</option>
+                <option value="completed" @selected($status === 'completed')>Completed</option>
+                <option value="cancelled" @selected($status === 'cancelled')>Cancelled</option>
+            </select>
+        </div>
+        <div class="col-md-4 col-xl-2">
+            <label class="form-label fw-semibold mb-1">Payment status</label>
+            <select name="payment_status" class="form-select">
+                <option value="">All payments</option>
+                <option value="Unpaid" @selected($paymentStatus === 'Unpaid')>Unpaid</option>
+                <option value="Downpayment" @selected($paymentStatus === 'Downpayment')>Downpayment</option>
+                <option value="Fully Paid" @selected($paymentStatus === 'Fully Paid')>Fully Paid</option>
+            </select>
+        </div>
+        <div class="col-md-4 col-xl-2 d-flex gap-2">
+            <button type="submit" class="btn luxury-btn w-100">Filter</button>
+            @if($status || $paymentStatus || ($search ?? '') !== '' || ($dateFrom ?? '') !== '' || ($dateTo ?? '') !== '')
+                <a href="{{ route('admin.reservations') }}" class="btn btn-outline-secondary w-100">Clear</a>
+            @endif
+        </div>
+    </form>
+
     <div class="row g-3 mb-4 reservation-stats">
         <div class="col-sm-6 col-xl-3">
             <div class="reservation-stat reservation-stat--customers"><span>Customers</span><strong>{{ $customerCount }}</strong><small>Unique customer emails</small></div>
@@ -85,7 +125,6 @@
                                         <span>Upload</span>
                                         <input type="file" name="service_contract[]" accept="image/jpeg,image/png,image/webp" onchange="this.form.submit()" multiple required>
                                     </label>
-                                    <button class="btn btn-sm luxury-btn" type="submit">Save</button>
                                 </form>
                             </div>
                         </td>

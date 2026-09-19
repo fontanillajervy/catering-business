@@ -23,15 +23,134 @@ class AdminController extends Controller
         return view('admin.dashboard', compact('reservationCount', 'inquiryCount', 'serviceCount', 'packageCount'));
     }
 
-    public function reservations()
+    public function reservations(Request $request)
     {
-        $reservations = Reservation::with('client', 'package')->latest()->get();
-        $customerCount = Reservation::query()->distinct('email')->count('email');
-        $pendingCount = $reservations->where('status', 'pending')->count();
-        $acceptedCount = $reservations->where('status', 'confirmed')->count();
-        $cancelledCount = $reservations->where('status', 'cancelled')->count();
+        $status = $request->input('status');
+        $paymentStatus = $request->input('payment_status');
+        $search = $request->input('search');
+        $dateFrom = $request->input('date_from');
+        $dateTo = $request->input('date_to');
 
-        return view('admin.reservations', compact('reservations', 'customerCount', 'pendingCount', 'acceptedCount', 'cancelledCount'));
+        $query = Reservation::with('client', 'package')->latest();
+
+        if ($status && in_array($status, ['pending', 'confirmed', 'completed', 'cancelled'], true)) {
+            $query->where('status', $status);
+        }
+
+        if ($paymentStatus && in_array($paymentStatus, ['Unpaid', 'Downpayment', 'Fully Paid'], true)) {
+            $query->where('payment_status', $paymentStatus);
+        }
+
+        if ($search !== null && trim($search) !== '') {
+            $term = trim($search);
+            $query->where(function ($subQuery) use ($term) {
+                $subQuery->where('full_name', 'like', '%' . $term . '%')
+                    ->orWhere('email', 'like', '%' . $term . '%')
+                    ->orWhere('contact_number', 'like', '%' . $term . '%')
+                    ->orWhere('reservation_code', 'like', '%' . $term . '%');
+            });
+        }
+
+        if ($dateFrom) {
+            $query->whereDate('event_date', '>=', $dateFrom);
+        }
+
+        if ($dateTo) {
+            $query->whereDate('event_date', '<=', $dateTo);
+        }
+
+        $reservations = $query->get();
+        $customerCount = Reservation::query()->distinct('email')->count('email');
+        $pendingCount = Reservation::query()->where('status', 'pending')->count();
+        $acceptedCount = Reservation::query()->where('status', 'confirmed')->count();
+        $cancelledCount = Reservation::query()->where('status', 'cancelled')->count();
+
+        return view('admin.reservations', compact(
+            'reservations',
+            'customerCount',
+            'pendingCount',
+            'acceptedCount',
+            'cancelledCount',
+            'status',
+            'paymentStatus',
+            'search',
+            'dateFrom',
+            'dateTo',
+        ))->with([
+            'filterStatus' => $status,
+            'filterPaymentStatus' => $paymentStatus,
+            'search' => $search,
+            'dateFrom' => $dateFrom,
+            'dateTo' => $dateTo,
+        ]);
+    }
+
+    public function exportReservationsCsv(Request $request)
+    {
+        $query = Reservation::query()->latest();
+
+        $status = $request->input('status');
+        $paymentStatus = $request->input('payment_status');
+        $search = trim((string) $request->input('search', ''));
+        $dateFrom = $request->input('date_from');
+        $dateTo = $request->input('date_to');
+
+        if ($status && in_array($status, ['pending', 'confirmed', 'completed', 'cancelled'], true)) {
+            $query->where('status', $status);
+        }
+
+        if ($paymentStatus && in_array($paymentStatus, ['Unpaid', 'Downpayment', 'Fully Paid'], true)) {
+            $query->where('payment_status', $paymentStatus);
+        }
+
+        if ($search !== '') {
+            $query->where(function ($subQuery) use ($search) {
+                $subQuery->where('full_name', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', '%' . $search . '%')
+                    ->orWhere('contact_number', 'like', '%' . $search . '%')
+                    ->orWhere('reservation_code', 'like', '%' . $search . '%');
+            });
+        }
+
+        if ($dateFrom) {
+            $query->whereDate('event_date', '>=', $dateFrom);
+        }
+
+        if ($dateTo) {
+            $query->whereDate('event_date', '<=', $dateTo);
+        }
+
+        $reservations = $query->get();
+
+        $handle = fopen('php://temp', 'r+');
+        fputcsv($handle, ['Reservation Code', 'Customer Name', 'Email', 'Contact Number', 'Event Type', 'Event Date', 'Venue', 'Status', 'Payment Status', 'Amount Paid', 'Balance']);
+
+        foreach ($reservations as $reservation) {
+            fputcsv($handle, [
+                $reservation->reservation_code ?? '',
+                $reservation->full_name ?? '',
+                $reservation->email ?? '',
+                $reservation->contact_number ?? '',
+                $reservation->event_type ?? '',
+                $reservation->event_date ? \Carbon\Carbon::parse($reservation->event_date)->format('Y-m-d') : '',
+                $reservation->venue ?? '',
+                $reservation->status ?? '',
+                $reservation->payment_status ?? '',
+                (string) ($reservation->amount_paid ?? 0),
+                (string) ($reservation->balance ?? 0),
+            ]);
+        }
+
+        rewind($handle);
+        $csv = stream_get_contents($handle);
+        fclose($handle);
+
+        $filename = 'reservations-' . now()->format('YmdHis') . '.csv';
+
+        return response($csv ?: '', 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
     }
 
     public function inquiries()
