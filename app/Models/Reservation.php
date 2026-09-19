@@ -25,10 +25,17 @@ class Reservation extends Model
         'service_contract',
         'service_contracts',
         'status',
+        'payment_status',
+        'payment_type',
+        'amount_paid',
+        'balance',
         'reservation_code',
     ];
 
     protected $casts = [
+        'estimated_budget' => 'float',
+        'amount_paid' => 'float',
+        'balance' => 'float',
         'service_contracts' => 'array',
     ];
 

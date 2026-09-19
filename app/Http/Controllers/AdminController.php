@@ -115,8 +115,39 @@ class AdminController extends Controller
 
     public function updateReservationStatus(Request $request, Reservation $reservation)
     {
-        $reservation->update($request->validate(['status' => ['required', 'in:pending,confirmed,completed,cancelled']]));
-        return back()->with('success', 'Reservation status updated.');
+        $data = $request->validate([
+            'status' => ['sometimes', 'required', 'in:pending,confirmed,completed,cancelled'],
+            'payment_status' => ['sometimes', 'nullable', 'in:Unpaid,Downpayment,Fully Paid'],
+            'payment_type' => ['sometimes', 'nullable', 'in:Unpaid,Downpayment,Full Payment'],
+            'amount_paid' => ['sometimes', 'nullable', 'numeric', 'min:0'],
+        ]);
+
+        $amountPaid = (float) ($data['amount_paid'] ?? $reservation->amount_paid ?? 0);
+        $totalAmount = (float) ($reservation->estimated_budget ?? 0);
+
+        if (array_key_exists('amount_paid', $data) || array_key_exists('payment_type', $data) || array_key_exists('payment_status', $data) || $request->has('amount_paid') || $request->has('payment_type')) {
+            if ($amountPaid <= 0) {
+                $data['payment_status'] = 'Unpaid';
+                $data['payment_type'] = $data['payment_type'] ?? 'Unpaid';
+            } elseif ($amountPaid >= $totalAmount) {
+                $data['payment_status'] = 'Fully Paid';
+                $data['payment_type'] = $data['payment_type'] ?? 'Full Payment';
+            } else {
+                $data['payment_status'] = 'Downpayment';
+                $data['payment_type'] = $data['payment_type'] ?? 'Downpayment';
+            }
+
+            $data['amount_paid'] = $amountPaid;
+            $data['balance'] = round(max(0, $totalAmount - $amountPaid), 2);
+        }
+
+        if (! isset($data['balance']) && $reservation->amount_paid !== null) {
+            $data['balance'] = round(max(0, $totalAmount - ($reservation->amount_paid ?? 0)), 2);
+        }
+
+        $reservation->update($data);
+
+        return back()->with('success', 'Reservation saved successfully.');
     }
 
     public function uploadReservationContract(Request $request, Reservation $reservation)

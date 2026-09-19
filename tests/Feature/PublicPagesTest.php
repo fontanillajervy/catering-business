@@ -103,4 +103,40 @@ class PublicPagesTest extends TestCase
         $this->assertStringContainsString('daily', strtolower($csv));
         $this->assertStringContainsString('Reservations', $csv);
     }
+
+    public function test_admin_can_track_reservation_payment_status_and_balance(): void
+    {
+        $reservation = \App\Models\Reservation::create([
+            'client_id' => null,
+            'package_id' => 1,
+            'full_name' => 'Test Client',
+            'contact_number' => '09814542318',
+            'email' => 'client@example.com',
+            'address' => '123 Test Street, Cebu City',
+            'event_type' => 'Wedding',
+            'event_date' => now()->addDays(5)->toDateString(),
+            'event_time' => '18:00',
+            'venue' => 'Nustad Hall',
+            'guest_count' => 100,
+            'estimated_budget' => 25000,
+            'status' => 'pending',
+            'reservation_code' => 'RES-TEST-001',
+        ]);
+
+        $request = new \Illuminate\Http\Request([
+            'status' => 'completed',
+            'payment_status' => 'Downpayment',
+            'payment_type' => 'Downpayment',
+            'amount_paid' => 8000,
+        ]);
+
+        $response = app(\App\Http\Controllers\AdminController::class)->updateReservationStatus($request, $reservation);
+
+        $this->assertSame('completed', $reservation->fresh()->status);
+        $this->assertSame('Downpayment', $reservation->fresh()->payment_status);
+        $this->assertSame('Downpayment', $reservation->fresh()->payment_type);
+        $this->assertSame(8000.0, (float) $reservation->fresh()->amount_paid);
+        $this->assertSame(17000.0, (float) $reservation->fresh()->balance);
+        $this->assertNotNull($response);
+    }
 }
