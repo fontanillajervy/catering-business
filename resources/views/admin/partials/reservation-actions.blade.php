@@ -24,7 +24,7 @@
                 <option value="Downpayment" @selected(($reservation->payment_type ?? $reservation->payment_status) === 'Downpayment')>Downpayment</option>
                 <option value="Full Payment" @selected(($reservation->payment_type ?? $reservation->payment_status) === 'Full Payment')>Full Payment</option>
             </select>
-            <input type="number" name="amount_paid" min="0" step="0.01" value="{{ old('amount_paid', $reservation->amount_paid ?? 0) }}" class="form-control form-control-sm" placeholder="Amount">
+            <input type="number" name="amount_paid" min="0" step="1" value="{{ old('amount_paid', (int) ($reservation->amount_paid ?? 0)) }}" class="form-control form-control-sm" placeholder="Amount">
             <button class="btn btn-sm luxury-btn" type="submit">Save</button>
         </form>
     </div>

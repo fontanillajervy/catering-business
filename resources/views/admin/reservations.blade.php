@@ -75,6 +75,7 @@
                 <tr>
                     <th>Unique ID</th>
                     <th>Customer</th>
+                    <th>Package</th>
                     <th>Event</th>
                     <th>Schedule</th>
                     <th>Guests</th>
@@ -95,6 +96,9 @@
                             <strong>{{ $reservation->full_name }}</strong><br>
                             <a class="customer-contact" href="mailto:{{ $reservation->email }}">{{ $reservation->email }}</a><br>
                             <a class="customer-contact" href="tel:{{ $reservation->contact_number }}">{{ $reservation->contact_number }}</a>
+                        </td>
+                        <td>
+                            <strong>{{ $reservation->package?->name ?? 'Custom package' }}</strong>
                         </td>
                         <td>
                             {{ $reservation->event_type }}<br>
@@ -154,7 +158,7 @@
                                         <option value="Full Payment" @selected($paymentType === 'Full Payment')>Full Payment</option>
                                     </select>
                                     <label class="payment-field-label">Paid</label>
-                                    <input type="number" name="amount_paid" min="0" step="0.01" value="{{ old('amount_paid', $reservation->amount_paid ?? 0) }}" class="form-control form-control-sm" placeholder="0.00">
+                                    <input type="number" name="amount_paid" min="0" step="1" value="{{ old('amount_paid', (int) ($reservation->amount_paid ?? 0)) }}" class="form-control form-control-sm" placeholder="0">
                                     <small class="payment-balance">Balance: ₱{{ number_format((float) ($reservation->balance ?? max(0, ($reservation->estimated_budget ?? 0) - ($reservation->amount_paid ?? 0))), 2) }}</small>
                                     <button class="btn btn-sm luxury-btn" type="submit">Save</button>
                                 </div>
