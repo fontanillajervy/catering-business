@@ -27,13 +27,14 @@ class AuthController extends Controller
 
         $user = User::where('email', $email)->first();
         $isPrimaryAdmin = $email === $expectedEmail && $password === $expectedPassword;
-        $isTeamAdmin = $user && Hash::check($password, $user->password);
+        $isFullAdminUser = $user && $user->role === 'full' && Hash::check($password, $user->password);
+        $isTeamAdmin = $user && $user->role === 'limited' && Hash::check($password, $user->password);
 
-        if ($isPrimaryAdmin || $isTeamAdmin) {
+        if ($isPrimaryAdmin || $isFullAdminUser || $isTeamAdmin) {
             $request->session()->regenerate();
             $request->session()->put('is_admin', true);
-            $request->session()->put('admin_role', $isPrimaryAdmin ? 'full' : 'limited');
-            $request->session()->put('admin_user_id', $isTeamAdmin ? $user->id : null);
+            $request->session()->put('admin_role', $isPrimaryAdmin || $isFullAdminUser ? 'full' : 'limited');
+            $request->session()->put('admin_user_id', $user?->id);
             $request->session()->put('admin_name', $isPrimaryAdmin ? 'Primary Administrator' : $user->name);
             $request->session()->put('admin_email', $email);
             $this->logAuthentication($request, 'Signed in');

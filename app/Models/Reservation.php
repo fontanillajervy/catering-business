@@ -25,6 +25,7 @@ class Reservation extends Model
         'service_contract',
         'service_contracts',
         'status',
+        'reservation_code',
     ];
 
     protected $casts = [

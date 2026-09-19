@@ -20,6 +20,7 @@ Route::get('/packages', [PublicController::class, 'packages'])->name('packages')
 Route::get('/packages/{package:slug}', [PublicController::class, 'packageShow'])->name('packages.show');
 Route::get('/gallery', [PublicController::class, 'gallery'])->name('gallery');
 Route::get('/reservation', [PublicController::class, 'reservation'])->name('reservation');
+Route::get('/reservation/status', [PublicController::class, 'reservationStatus'])->name('reservation.status');
 Route::get('/reservation/availability', [ReservationController::class, 'availability'])->name('reservation.availability');
 Route::post('/reservation', [ReservationController::class, 'store'])->middleware('throttle:5,10')->name('reservation.store');
 Route::get('/inquiry', [PublicController::class, 'inquiry'])->name('inquiry');

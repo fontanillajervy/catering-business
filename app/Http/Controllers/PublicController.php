@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Package;
 use App\Models\GalleryItem;
+use App\Models\Reservation;
 use App\Models\Service;
+use Illuminate\Http\Request;
 
 class PublicController extends Controller
 {
@@ -45,12 +47,26 @@ class PublicController extends Controller
         return view('public.gallery', ['galleryItems' => GalleryItem::latest()->get()]);
     }
 
-    public function reservation()
+    public function reservation(Request $request)
     {
         $this->ensureSignaturePackages();
         $packages = Package::orderBy('price')->get();
+        $reservation = null;
+        $lookupCode = trim((string) $request->query('code', ''));
 
-        return view('public.reservation', compact('packages'));
+        if ($lookupCode !== '') {
+            $reservation = Reservation::where('reservation_code', strtoupper($lookupCode))->first();
+        }
+
+        return view('public.reservation', compact('packages', 'reservation', 'lookupCode'));
+    }
+
+    public function reservationStatus(Request $request)
+    {
+        $code = trim((string) $request->query('code', ''));
+        $reservation = $code !== '' ? Reservation::where('reservation_code', strtoupper($code))->first() : null;
+
+        return view('public.reservation-status', compact('reservation', 'code'));
     }
 
     public function inquiry()

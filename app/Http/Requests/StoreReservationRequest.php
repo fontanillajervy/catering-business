@@ -19,7 +19,12 @@ class StoreReservationRequest extends FormRequest
             'email' => ['required', 'email'],
             'address' => ['required', 'string', 'max:500'],
             'event_type' => ['required', 'string', 'max:100'],
-            'event_date' => ['required', 'date', 'after_or_equal:today'],
+            'event_date' => ['required', 'date', 'after_or_equal:' . now()->addDays(2)->toDateString(), function ($attribute, $value, $fail) {
+                $minDate = now()->addDays(2)->toDateString();
+                if ($value < $minDate) {
+                    $fail('Reservations must be scheduled at least 2 days in advance.');
+                }
+            }],
             'event_time' => ['required', 'string', 'max:20'],
             'venue' => ['required', 'string', 'max:255'],
             'guest_count' => ['required', 'integer', 'min:1', 'max:1000'],

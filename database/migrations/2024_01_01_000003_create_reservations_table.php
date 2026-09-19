@@ -26,6 +26,7 @@ return new class extends Migration
             $table->text('special_requests')->nullable();
             $table->text('additional_notes')->nullable();
             $table->string('status')->default('pending');
+            $table->string('reservation_code')->nullable()->unique();
             $table->timestamps();
         });
     }

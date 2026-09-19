@@ -5,13 +5,21 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreReservationRequest;
 use App\Models\Client;
 use App\Models\Reservation;
+use Illuminate\Support\Str;
 use ReCaptcha\ReCaptcha;
 
 class ReservationController extends Controller
 {
     public function availability(\Illuminate\Http\Request $request)
     {
-        $data = $request->validate(['date' => ['required', 'date', 'after_or_equal:today']]);
+        $data = $request->validate([
+            'date' => ['required', 'date', 'after_or_equal:' . now()->addDays(2)->toDateString(), function ($attribute, $value, $fail) {
+                $minDate = now()->addDays(2)->toDateString();
+                if ($value < $minDate) {
+                    $fail('Reservations must be scheduled at least 2 days in advance.');
+                }
+            }],
+        ]);
         $bookings = Reservation::whereDate('event_date', $data['date'])
             ->where('status', '!=', 'cancelled')
             ->count();
@@ -50,6 +58,8 @@ class ReservationController extends Controller
             ]
         );
 
+        $reservationCode = $this->generateReservationCode();
+
         Reservation::create([
             'client_id' => $client->id,
             'package_id' => $request->input('package_id'),
@@ -67,8 +77,21 @@ class ReservationController extends Controller
             'special_requests' => $request->input('special_requests'),
             'additional_notes' => $request->input('additional_notes'),
             'status' => 'pending',
+            'reservation_code' => $reservationCode,
         ]);
 
-        return redirect()->back()->with('success', 'Your reservation request has been received.');
+        $request->session()->flash('reservation_code', $reservationCode);
+        $request->session()->flash('reservation_status', 'pending');
+
+        return redirect()->back()->with('success', 'Your reservation request has been received. Your reservation ID is ' . $reservationCode . '. Please keep this code to check your reservation status.');
+    }
+
+    private function generateReservationCode(): string
+    {
+        do {
+            $code = 'RES-' . strtoupper(Str::random(8));
+        } while (Reservation::where('reservation_code', $code)->exists());
+
+        return $code;
     }
 }

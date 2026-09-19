@@ -3,8 +3,8 @@
 @section('content')
 <div class="content-card p-4">
     <div class="mb-4">
-        <h1 class="fw-bold mb-1">Team Admins</h1>
-        <p class="text-muted mb-0">Create staff accounts for reservations and inquiries. These accounts cannot access reports, analytics, or activity logs.</p>
+        <h1 class="fw-bold mb-1">Admin Accounts</h1>
+        <p class="text-muted mb-0">Create either a primary admin or a team admin and choose the access level for each account.</p>
     </div>
 
     @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
@@ -13,7 +13,7 @@
     <div class="row g-4">
         <div class="col-lg-12 col-xl-4">
             <div class="card p-4 h-100">
-                <h5 class="fw-bold mb-3">Add team admin</h5>
+                <h5 class="fw-bold mb-3">Add admin</h5>
                 <form method="POST" action="{{ route('admin.users.store') }}">
                     @csrf
                     <div class="mb-3">
@@ -27,6 +27,14 @@
                         @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     <div class="mb-3">
+                        <label class="form-label" for="role">Access role</label>
+                        <select class="form-select @error('role') is-invalid @enderror" id="role" name="role" required>
+                            <option value="full" {{ old('role') === 'full' ? 'selected' : '' }}>Primary admin</option>
+                            <option value="limited" {{ old('role') === 'limited' ? 'selected' : '' }}>Team admin</option>
+                        </select>
+                        @error('role')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label" for="password">Password</label>
                         <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" required>
                         <div class="form-text">At least 8 characters.</div>
@@ -36,20 +44,21 @@
                         <label class="form-label" for="password_confirmation">Confirm password</label>
                         <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required>
                     </div>
-                    <button class="btn luxury-btn w-100" type="submit">Create team admin</button>
+                    <button class="btn luxury-btn w-100" type="submit">Create admin</button>
                 </form>
             </div>
         </div>
         <div class="col-lg-12 col-xl-8">
             <div class="card p-4 h-100">
-                <h5 class="fw-bold mb-3">Created team admins</h5>
+                <h5 class="fw-bold mb-3">Created admins</h5>
                 <div class="table-responsive">
                     <table class="table align-middle mb-0 team-admin-table">
                         <thead>
                             <tr>
                                 <th>Name</th>
-                                <th class="d-none d-md-table-cell">Email</th>
-                                <th class="d-none d-md-table-cell">Access</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Access</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -57,12 +66,13 @@
                                 <tr>
                                     <td>
                                         <div class="fw-semibold">{{ $user->name }}</div>
-                                        <small class="d-md-none text-muted">{{ $user->email }}</small>
                                     </td>
-                                    <td class="d-none d-md-table-cell">{{ $user->email }}</td>
-                                    <td class="d-none d-md-table-cell">
+                                    <td>{{ $user->email }}</td>
+                                    <td>
+                                        <span class="badge-soft {{ $user->role === 'full' ? 'badge-primary' : 'badge-team' }}">{{ $user->role === 'full' ? 'Primary admin' : 'Team admin' }}</span>
+                                    </td>
+                                    <td>
                                         <div class="team-admin-access">
-                                            <span class="badge-soft">Res. & Inquiries</span>
                                             <form method="POST" action="{{ route('admin.users.reset', $user) }}" class="team-admin-reset-form">
                                                 @csrf
                                                 @method('PUT')
@@ -76,7 +86,7 @@
                                     </td>
                                 </tr>
                             @empty
-                                <tr><td colspan="3" class="text-muted text-center py-3">No team admins yet.</td></tr>
+                                <tr><td colspan="4" class="text-muted text-center py-3">No admins yet.</td></tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -97,17 +107,17 @@
         background: rgba(47, 170, 164, 0.12);
         color: #0d6efd;
     }
-    .team-admin-table { table-layout: fixed; min-width: 560px; }
-    .team-admin-table th, .team-admin-table td { padding: .65rem .7rem; }
-    .team-admin-table th:nth-child(1), .team-admin-table td:nth-child(1) { width: 20%; }
-    .team-admin-table th:nth-child(2), .team-admin-table td:nth-child(2) { width: 27%; }
-    .team-admin-table th:nth-child(3), .team-admin-table td:nth-child(3) { width: 53%; }
-    .team-admin-table td { vertical-align: top; }
-    .team-admin-table td:nth-child(2) { overflow-wrap: anywhere; }
-    .team-admin-access { display: grid; gap: .45rem; }
-    .team-admin-reset-form { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; gap: .35rem; align-items: center; }
-    .team-admin-reset-form .form-control { padding: .4rem .55rem; font-size: .78rem; }
-    .team-admin-reset-form .btn { padding: .4rem .6rem; font-size: .78rem; }
+    .team-admin-table { table-layout: fixed; min-width: 680px; }
+    .team-admin-table th, .team-admin-table td { padding: .45rem .5rem; vertical-align: top; }
+    .team-admin-table th:nth-child(1), .team-admin-table td:nth-child(1) { width: 16%; }
+    .team-admin-table th:nth-child(2), .team-admin-table td:nth-child(2) { width: 24%; }
+    .team-admin-table th:nth-child(3), .team-admin-table td:nth-child(3) { width: 17%; }
+    .team-admin-table th:nth-child(4), .team-admin-table td:nth-child(4) { width: 43%; }
+    .team-admin-table td:nth-child(2), .team-admin-table td:nth-child(4) { overflow-wrap: anywhere; }
+    .team-admin-access { display: grid; gap: .35rem; }
+    .team-admin-reset-form { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; gap: .3rem; align-items: center; }
+    .team-admin-reset-form .form-control { padding: .3rem .4rem; font-size: .72rem; }
+    .team-admin-reset-form .btn { padding: .3rem .5rem; font-size: .72rem; }
     .team-admin-reset-form .form-control { min-width: 0; }
     .team-admin-reset-form .btn { white-space: nowrap; }
     @media(max-width:768px){

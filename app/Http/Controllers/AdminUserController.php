@@ -21,16 +21,19 @@ class AdminUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'role' => ['required', 'in:full,limited'],
         ]);
+
+        $roleLabel = $data['role'] === 'full' ? 'Primary admin' : 'Team admin';
 
         User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
-            'role' => 'limited',
+            'role' => $data['role'],
         ]);
 
-        return back()->with('success', 'Team admin created. They can manage reservations and inquiries but cannot view reports, analytics, or activity logs.');
+        return back()->with('success', $roleLabel . ' created successfully.');
     }
 
     public function resetPassword(Request $request, User $user): RedirectResponse
