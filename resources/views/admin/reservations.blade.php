@@ -152,15 +152,15 @@
                                 @csrf @method('PATCH')
                                 <input type="hidden" name="status" value="{{ $reservation->status }}">
                                 <div class="payment-stack">
-                                    <select name="payment_type" class="form-select form-select-sm">
-                                        <option value="Unpaid" @selected($paymentType === 'Unpaid')>Unpaid</option>
-                                        <option value="Downpayment" @selected($paymentType === 'Downpayment')>Downpayment</option>
-                                        <option value="Full Payment" @selected($paymentType === 'Full Payment')>Full Payment</option>
-                                    </select>
-                                    <label class="payment-field-label">Paid</label>
+                                    <label class="payment-field-label">Total</label>
+                                    <input type="number" name="estimated_budget" min="0" step="1" value="{{ old('estimated_budget', (int) ($reservation->estimated_budget ?? 0)) }}" class="form-control form-control-sm" placeholder="0">
+                                    <label class="payment-field-label">Down payment</label>
                                     <input type="number" name="amount_paid" min="0" step="1" value="{{ old('amount_paid', (int) ($reservation->amount_paid ?? 0)) }}" class="form-control form-control-sm" placeholder="0">
                                     <small class="payment-balance">Balance: ₱{{ number_format((float) ($reservation->balance ?? max(0, ($reservation->estimated_budget ?? 0) - ($reservation->amount_paid ?? 0))), 2) }}</small>
-                                    <button class="btn btn-sm luxury-btn" type="submit">Save</button>
+                                    <div class="payment-actions-inline">
+                                        <button class="btn btn-sm luxury-btn" type="submit">Save payment</button>
+                                        <button class="btn btn-sm btn-success" type="submit" name="mark_fully_paid" value="1">Fully paid</button>
+                                    </div>
                                 </div>
                             </form>
                         </td>
@@ -271,6 +271,9 @@
     .payment-stack { display: flex; flex-direction: column; gap: .35rem; min-width: 150px; }
     .payment-field-label { font-size: .6rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
     .payment-balance { font-size: .72rem; color: var(--muted); }
+    .payment-field-label { display: block; font-size: .68rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: .2rem; }
+    .payment-actions-inline { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .5rem; }
+    .payment-actions-inline .btn { flex: 1; }
     .payment-form { display: flex; }
     @media (max-width: 767px) {
         .reservation-action-group { width: 100%; }
