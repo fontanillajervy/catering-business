@@ -44,7 +44,22 @@ class PublicController extends Controller
 
     public function gallery()
     {
-        return view('public.gallery', ['galleryItems' => GalleryItem::latest()->get()]);
+        $eventType = request()->query('event_type');
+        $galleryItems = GalleryItem::query()
+            ->when($eventType, fn ($query) => $query->where('event_type', $eventType))
+            ->latest()
+            ->get();
+        $eventTypes = GalleryItem::query()
+            ->whereNotNull('event_type')
+            ->where('event_type', '!=', '')
+            ->distinct()
+            ->orderBy('event_type')
+            ->pluck('event_type')
+            ->push('Other Events')
+            ->unique()
+            ->values();
+
+        return view('public.gallery', compact('galleryItems', 'eventType', 'eventTypes'));
     }
 
     public function reservation(Request $request)

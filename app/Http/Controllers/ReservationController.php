@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreReservationRequest;
+use App\Mail\ReservationConfirmationMail;
 use App\Models\Client;
+use App\Models\Package;
 use App\Models\Reservation;
+use App\Services\RecaptchaVerifier;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
-use ReCaptcha\ReCaptcha;
 
 class ReservationController extends Controller
 {
@@ -27,17 +30,13 @@ class ReservationController extends Controller
         return response()->json(['bookings' => $bookings, 'remaining' => max(0, 3 - $bookings), 'available' => $bookings < 3]);
     }
 
-    public function store(StoreReservationRequest $request)
+    public function store(StoreReservationRequest $request, RecaptchaVerifier $recaptchaVerifier)
     {
         if (now()->timestamp - (int) $request->input('form_started') < 3) {
             return back()->withInput()->withErrors(['full_name' => 'Unable to submit this request. Please try again.']);
         }
 
-        // Verify reCAPTCHA
-        $recaptcha = new ReCaptcha(config('services.recaptcha.secret_key'));
-        $resp = $recaptcha->verify($request->input('g-recaptcha-response'), $_SERVER['REMOTE_ADDR'] ?? '');
-        
-        if (!$resp->isSuccess()) {
+        if (! $recaptchaVerifier->verify($request->input('g-recaptcha-response'), $request->ip() ?? '')) {
             return back()->withInput()->withErrors(['g-recaptcha-response' => 'Please verify that you are not a robot.']);
         }
 
@@ -47,6 +46,14 @@ class ReservationController extends Controller
 
         if ($bookings >= 3) {
             return back()->withInput()->withErrors(['event_date' => 'This date is fully booked. Please select another date.']);
+        }
+
+        $package = Package::findOrFail($request->integer('package_id'));
+        $guestCount = $request->integer('guest_count');
+        if ($guestCount < $package->min_guests || $guestCount > $package->max_guests) {
+            return back()->withInput()->withErrors([
+                'guest_count' => "This package is available for {$package->min_guests} to {$package->max_guests} guests.",
+            ]);
         }
 
         $client = Client::firstOrCreate(
@@ -72,7 +79,7 @@ class ReservationController extends Controller
             'event_time' => $request->input('event_time'),
             'venue' => $request->input('venue'),
             'guest_count' => $request->input('guest_count'),
-            'estimated_budget' => $request->input('estimated_budget'),
+            'estimated_budget' => round((float) $package->price * $guestCount, 2),
             'additional_services' => $request->input('additional_services'),
             'special_requests' => $request->input('special_requests'),
             'additional_notes' => $request->input('additional_notes'),
@@ -82,6 +89,19 @@ class ReservationController extends Controller
 
         $request->session()->flash('reservation_code', $reservationCode);
         $request->session()->flash('reservation_status', 'pending');
+
+        try {
+            Mail::to($request->input('email'))->send(new ReservationConfirmationMail(
+                $reservationCode,
+                $request->input('full_name'),
+                $request->input('event_type'),
+                $request->input('event_date'),
+                round((float) $package->price * $guestCount, 2),
+            ));
+        } catch (\Throwable $exception) {
+            report($exception);
+            return redirect()->back()->with('success', 'Your reservation was received, but we could not email your reservation ID. Please save this ID: ' . $reservationCode . '.');
+        }
 
         return redirect()->back()->with('success', 'Your reservation request has been received. Your reservation ID is ' . $reservationCode . '. Please keep this code to check your reservation status.');
     }

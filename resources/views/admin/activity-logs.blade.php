@@ -12,7 +12,7 @@
     </div>
     
     <form class="row g-2 p-3 mb-4 audit-filter" method="GET">
-        <div class="col-md-5 col-12">
+        <div class="col-md-4 col-12">
             <label class="visually-hidden" for="actor">Administrator</label>
             <select id="actor" name="actor" class="form-select">
                 <option value="">All administrators</option>
@@ -20,10 +20,20 @@
                     <option value="{{ $actor->actor_email }}" @selected(request('actor') === $actor->actor_email)>{{ $actor->actor_name }} — {{ $actor->actor_email }}</option>
                 @endforeach
             </select>
+            <div class="form-text">Limit results to one administrator.</div>
         </div>
-        <div class="col-md-5 col-12">
+        <div class="col-md-4 col-12">
             <label class="visually-hidden" for="action">Action</label>
             <input id="action" name="action" class="form-control" value="{{ request('action') }}" placeholder="Search actions, e.g. signed in or updated">
+            <div class="form-text">Search action names or descriptions.</div>
+        </div>
+        <div class="col-md-2 col-12">
+            <label class="visually-hidden" for="per_page">Entries per page</label>
+            <select id="per_page" name="per_page" class="form-select" title="Entries per page">
+                @foreach([10, 30, 50, 100] as $pageSize)
+                    <option value="{{ $pageSize }}" @selected((int) request('per_page', 30) === $pageSize)>{{ $pageSize }} per page</option>
+                @endforeach
+            </select>
         </div>
         <div class="col-md-2 col-12">
             <button class="btn luxury-btn w-100">Filter logs</button>

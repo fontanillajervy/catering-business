@@ -54,6 +54,36 @@ In order to ensure that the Laravel community is welcoming to all, please review
 
 If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
 
+## Catering Application Setup
+
+Run the schema update with the PHP executable bundled with XAMPP:
+
+```powershell
+C:\xampp\php\php.exe artisan migrate --force
+C:\xampp\php\php.exe artisan storage:link
+```
+
+Set `BUSINESS_ADDRESS` in `.env` to the complete customer-facing street address. The default remains the existing public location, `Quezon City, Metro Manila`.
+
+Reservation IDs are emailed to the address entered on the reservation form. To deliver messages through Gmail, enable 2-Step Verification on the sending Google account, create a Google App Password, and set the following values in `.env` (use the App Password, not the account password):
+
+```dotenv
+MAIL_MAILER=smtp
+MAIL_SCHEME=null
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=your-sending-account@gmail.com
+MAIL_PASSWORD=your-16-character-app-password
+MAIL_FROM_ADDRESS=your-sending-account@gmail.com
+MAIL_FROM_NAME="3YOS Catering"
+```
+
+After changing mail or address settings, refresh cached configuration:
+
+```powershell
+C:\xampp\php\php.exe artisan config:clear
+```
+
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).

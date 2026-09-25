@@ -36,6 +36,7 @@
         .footer-heading{color:#fffaf3;font-size:.76rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
         .footer-links{display:grid;gap:.58rem;font-size:.9rem}
         .footer-contact{display:flex;align-items:center;gap:.7rem;padding:.78rem 0;border-top:1px solid rgba(255,255,255,.12)}
+        @media(max-width:575px){.footer .row.g-5{--bs-gutter-x:1.5rem}}
         .footer-contact-icon{display:grid;place-items:center;flex:0 0 30px;width:30px;height:30px;border:1px solid rgba(231,183,122,.45);border-radius:50%;color:#e7b77a;font-size:.68rem;font-weight:800}
         .footer-contact small{display:block;color:#c8bdb3;font-size:.7rem;letter-spacing:.04em;text-transform:uppercase}
         .footer-facebook{display:inline-flex;align-items:center;gap:.6rem;padding:.7rem .9rem;border:1px solid rgba(231,183,122,.6);color:#fff8ef!important;font-size:.82rem;font-weight:700;transition:.2s ease;border-radius:999px}
@@ -49,6 +50,7 @@
         body.dark-mode main,body.dark-mode .bg-paper,body.dark-mode .section-heading,body.dark-mode .card,body.dark-mode .form-card,body.dark-mode .service-tile,body.dark-mode .process-card,body.dark-mode .cta-panel,body.dark-mode .occasion-panel,body.dark-mode .metric-card,body.dark-mode .mini-cta,body.dark-mode .reservation-sidebar,body.dark-mode .reservation-tile,body.dark-mode .process-item{background:#201f1d!important;color:#f5f1e9!important}
         body.dark-mode .card p,body.dark-mode .card h1,body.dark-mode .card h2,body.dark-mode .card h3,body.dark-mode .card h4,body.dark-mode .card h5,body.dark-mode .process-item strong,body.dark-mode .process-item p,body.dark-mode .service-tile h3,body.dark-mode .service-tile p,body.dark-mode .mini-cta h3,body.dark-mode .mini-cta p,body.dark-mode .reservation-checklist li,body.dark-mode .reservation-tile p,body.dark-mode .form-label,body.dark-mode .text-muted,body.dark-mode .eyebrow{color:#f5f1e9!important}
         body.dark-mode .form-control,body.dark-mode .form-select{background:#151515;border-color:#555047;color:#f5f1e9}
+        body.dark-mode .form-control::placeholder,body.dark-mode .form-select::placeholder{color:#b9b1a5;opacity:1}
         body.dark-mode .form-text,body.dark-mode .date-availability{color:var(--muted)!important}
         body.dark-mode .date-availability.text-success{color:#8fe3aa!important}
         body.dark-mode .date-availability.text-danger{color:#ff9b9b!important}
@@ -112,6 +114,13 @@
                 </div>
                 <div class="col-6 col-lg-3">
                     <div class="footer-heading mb-3">Get in touch</div>
+                    <div class="footer-contact">
+                        <span class="footer-contact-icon">AD</span>
+                        <div>
+                            <small>Business address</small>
+                            <span>{{ config('app.business_address') }}</span>
+                        </div>
+                    </div>
                     <div class="footer-contact">
                         <span class="footer-contact-icon">FB</span>
                         <div>

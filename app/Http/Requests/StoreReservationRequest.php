@@ -15,16 +15,16 @@ class StoreReservationRequest extends FormRequest
     {
         return [
             'full_name' => ['required', 'string', 'min:2', 'max:255', 'regex:/^[\pL\pN\s\.\'\-]+$/u'],
-            'contact_number' => ['bail', 'required', 'string', 'min:10', 'max:16', 'regex:/^(?:\+63|0)(?:[ -]?\d{3}){2}[ -]?\d{4}$/', function ($attribute, $value, $fail) {
+            'contact_number' => ['bail', 'required', 'string', 'regex:/^\+63\d{10}$/', function ($attribute, $value, $fail) {
                 $digits = preg_replace('/\D+/', '', $value ?? '');
 
-                if (strlen($digits) < 11 || strlen($digits) > 12) {
-                    $fail('Please enter a valid contact number like +639xxxxxxxxx or 09xxxxxxxxx.');
+                if (!$value || !preg_match('/^\+63\d{10}$/', $value)) {
+                    $fail('Please enter a valid Philippine contact number in +63 format, for example +639123456789.');
                     return;
                 }
 
-                if (preg_match('/^(\d)\1{8,}$/', $digits)) {
-                    $fail('Please enter a valid contact number like +639xxxxxxxxx or 09xxxxxxxxx.');
+                if (preg_match('/^(\d)\1{9,}$/', $digits)) {
+                    $fail('Please enter a valid Philippine contact number in +63 format, for example +639123456789.');
                 }
             }],
             'email' => ['required', 'string', 'email:rfc', 'max:255', 'regex:/^[A-Za-z0-9.!#$%&\'*+\/=?^_`{|}~-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$/'],
@@ -54,7 +54,6 @@ class StoreReservationRequest extends FormRequest
                 }
             }],
             'guest_count' => ['required', 'integer', 'min:1', 'max:1000'],
-            'estimated_budget' => ['required', 'integer', 'min:0'],
             'package_id' => ['required', 'exists:packages,id'],
             'additional_services' => ['nullable', 'string', 'max:1000'],
             'special_requests' => ['nullable', 'string', 'max:1000'],
@@ -71,9 +70,7 @@ class StoreReservationRequest extends FormRequest
             'full_name.required' => 'Please provide your full name.',
             'full_name.regex' => 'Please enter a valid full name without special characters.',
             'contact_number.required' => 'Please provide a contact number.',
-            'contact_number.regex' => 'Please enter a valid contact number like +639xxxxxxxxx or 09xxxxxxxxx.',
-            'contact_number.min' => 'Please enter a valid contact number like +639xxxxxxxxx or 09xxxxxxxxx.',
-            'contact_number.max' => 'Please enter a valid contact number like +639xxxxxxxxx or 09xxxxxxxxx.',
+            'contact_number.regex' => 'Please enter a valid Philippine contact number in +63 format, for example +639123456789.',
             'email.required' => 'Please provide your email address.',
             'email.email' => 'Please enter a valid email address.',
             'email.regex' => 'Please enter a valid email address.',

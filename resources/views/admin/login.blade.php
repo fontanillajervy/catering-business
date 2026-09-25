@@ -36,8 +36,9 @@
                 <form method="POST" action="{{ route('admin.login.post') }}">
                     @csrf
                     <div class="mb-3">
-                        <label class="form-label">Email</label>
-                        <input type="email" name="email" class="form-control form-control-lg" required>
+                        <label class="form-label" for="login-email">Email</label>
+                        <input id="login-email" type="email" name="email" class="form-control form-control-lg" autocomplete="username" required>
+                        <div class="form-text">Enter the email address registered for your admin account.</div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Password</label>
@@ -47,6 +48,7 @@
                                 <i class="fas fa-eye"></i>
                             </button>
                         </div>
+                        <div class="form-text">Enter your account password.</div>
                     </div>
                     <div class="text-end mb-3"><a href="{{ route('password.request') }}" class="small">Forgot password?</a></div>
                     <button type="submit" class="btn btn-primary w-100 py-2">Login</button>

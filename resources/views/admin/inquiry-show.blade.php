@@ -40,6 +40,7 @@
                 <form method="POST" action="{{ route('admin.inquiries.reply', $inquiry) }}">
                     @csrf
                     <textarea class="form-control @error('reply') is-invalid @enderror" name="reply" rows="8" required style="resize:vertical;min-height:200px">{{ old('reply', $inquiry->admin_reply) }}</textarea>
+                    <div class="form-text">Write the response that will be emailed to {{ $inquiry->email }}.</div>
                     @error('reply')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     <button class="btn luxury-btn mt-3 w-100 w-sm-auto" type="submit">Send reply</button>
                 </form>

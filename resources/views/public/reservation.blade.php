@@ -55,22 +55,22 @@
                     </div>
                 @endif
 
-                <form method="POST" action="{{ route('reservation.store') }}" id="reservation-form">@csrf<input type="text" name="website" class="d-none" tabindex="-1" autocomplete="off"><input type="hidden" name="form_started" value="{{ now()->timestamp }}">
+                <form method="POST" action="{{ route('reservation.store') }}" id="reservation-form" onsubmit="return confirm('Submit this reservation request? Your reservation ID will be emailed to you.')">@csrf<input type="text" name="website" class="d-none" tabindex="-1" autocomplete="off"><input type="hidden" name="form_started" value="{{ now()->timestamp }}">
                     <div class="row g-3">
-                        <div class="col-md-6"><label class="form-label">Full name</label><input type="text" name="full_name" value="{{ old('full_name') }}" class="form-control" required></div>
-                        <div class="col-md-6"><label class="form-label">Contact number</label><input type="text" name="contact_number" value="{{ old('contact_number') }}" class="form-control" required></div>
-                        <div class="col-md-6"><label class="form-label">Email address</label><input type="email" name="email" value="{{ old('email') }}" class="form-control" required></div>
-                        <div class="col-md-6"><label class="form-label">Complete address</label><input type="text" name="address" value="{{ old('address') }}" class="form-control" required></div>
-                        <div class="col-md-6"><label class="form-label">Event type</label><select name="event_type" class="form-select" required><option value="">Select an event type</option>@foreach(['Wedding','Birthday','Debut','Anniversary','Corporate Event','Baptism','Graduation','Other'] as $type)<option value="{{ $type }}" @selected(old('event_type') === $type)>{{ $type }}</option>@endforeach</select></div>
-                        <div class="col-md-6"><label class="form-label">Catering package</label><select name="package_id" id="package_id" class="form-select" required><option value="">Select a package</option>@foreach($packages as $package)<option value="{{ $package->id }}" data-price="{{ $package->price }}" @selected(old('package_id') == $package->id)>{{ $package->name }} — from &#8369;{{ number_format($package->price, 0) }}/guest</option>@endforeach</select></div>
-                        <div class="col-md-6"><label class="form-label">Event date</label><input type="date" name="event_date" id="event_date" value="{{ old('event_date') }}" min="{{ now()->addDays(2)->toDateString() }}" class="form-control" required><div id="date-availability" class="date-availability form-text">Choose a date at least 2 days in advance.</div></div>
-                        <div class="col-md-6"><label class="form-label">Event time</label><input type="time" name="event_time" value="{{ old('event_time') }}" class="form-control" required></div>
-                        <div class="col-md-6"><label class="form-label">Venue</label><input type="text" name="venue" value="{{ old('venue') }}" class="form-control" required></div>
-                        <div class="col-md-6"><label class="form-label">Expected guests</label><input type="number" name="guest_count" id="guest_count" value="{{ old('guest_count') }}" min="1" max="1000" class="form-control" required></div>
-                        <div class="col-md-6"><label class="form-label">Estimated budget (&#8369;)</label><input type="number" step="1" min="0" name="estimated_budget" id="estimated_budget" value="{{ old('estimated_budget') }}" class="form-control" required></div>
-                        <div class="col-12"><label class="form-label">Additional services</label><textarea name="additional_services" class="form-control" rows="2">{{ old('additional_services') }}</textarea></div>
-                        <div class="col-12"><label class="form-label">Special requests</label><textarea name="special_requests" class="form-control" rows="2">{{ old('special_requests') }}</textarea></div>
-                        <div class="col-12"><label class="form-label">Additional notes</label><textarea name="additional_notes" class="form-control" rows="2">{{ old('additional_notes') }}</textarea></div>
+                        <div class="col-md-6"><label class="form-label" for="full_name">Full name</label><input id="full_name" type="text" name="full_name" value="{{ old('full_name') }}" class="form-control" autocomplete="name" required><div class="form-text">Enter the name of the person coordinating this event.</div></div>
+                        <div class="col-md-6"><label class="form-label" for="contact_number">Contact number</label><input id="contact_number" type="tel" name="contact_number" value="{{ old('contact_number') }}" class="form-control" inputmode="tel" pattern="\+63[0-9]{10}" maxlength="13" placeholder="+639123456789" title="Use +63 followed by exactly 10 digits." required><div class="form-text">Use +63 followed by exactly 10 digits, for example +639123456789.</div></div>
+                        <div class="col-md-6"><label class="form-label" for="email">Email address</label><input id="email" type="email" name="email" value="{{ old('email') }}" class="form-control" autocomplete="email" required><div class="form-text">Your reservation ID and status notifications will be sent to this address.</div></div>
+                        <div class="col-md-6"><label class="form-label" for="address">Complete address</label><input id="address" type="text" name="address" value="{{ old('address') }}" class="form-control" autocomplete="street-address" required><div class="form-text">Include your city or municipality.</div></div>
+                        <div class="col-md-6"><label class="form-label" for="event_type">Event type</label><select id="event_type" name="event_type" class="form-select" required><option value="">Select an event type</option>@foreach(['Wedding','Birthday','Debut','Anniversary','Corporate Event','Baptism','Graduation','Other'] as $type)<option value="{{ $type }}" @selected(old('event_type') === $type)>{{ $type }}</option>@endforeach</select><div class="form-text">Choose the closest match for your occasion.</div></div>
+                        <div class="col-md-6"><label class="form-label" for="package_id">Catering package</label><select name="package_id" id="package_id" class="form-select" required><option value="">Select a package</option>@foreach($packages as $package)<option value="{{ $package->id }}" data-price="{{ $package->price }}" data-min-guests="{{ $package->min_guests }}" data-max-guests="{{ $package->max_guests }}" @selected(old('package_id') == $package->id)>{{ $package->name }} ({{ $package->min_guests }}–{{ $package->max_guests }} guests)</option>@endforeach</select><div class="form-text">Package availability depends on the event guest count.</div></div>
+                        <div class="col-md-6"><label class="form-label" for="event_date">Event date</label><input type="date" name="event_date" id="event_date" value="{{ old('event_date') }}" min="{{ now()->addDays(2)->toDateString() }}" class="form-control" required><div id="date-availability" class="date-availability form-text">Choose a date at least 2 days in advance.</div></div>
+                        <div class="col-md-6"><label class="form-label" for="event_time">Event time</label><input id="event_time" type="time" name="event_time" value="{{ old('event_time') }}" class="form-control" required><div class="form-text">Enter the event start time.</div></div>
+                        <div class="col-md-6"><label class="form-label" for="venue">Venue</label><input id="venue" type="text" name="venue" value="{{ old('venue') }}" class="form-control" required><div class="form-text">Enter the venue name and location.</div></div>
+                        <div class="col-md-6"><label class="form-label" for="guest_count">Expected guests</label><input type="number" name="guest_count" id="guest_count" value="{{ old('guest_count') }}" min="1" max="1000" class="form-control" required><div class="form-text" id="guest-guidance">Enter your expected number of attendees.</div></div>
+                        <div class="col-md-6"><label class="form-label" for="estimated_total">Estimated total</label><output id="estimated_total" class="form-control" aria-live="polite">Choose package + guests</output><div class="form-text">Auto-calculated total.</div></div>
+                        <div class="col-12"><label class="form-label" for="additional_services">Additional services</label><textarea id="additional_services" name="additional_services" class="form-control" rows="2">{{ old('additional_services') }}</textarea><div class="form-text">Optional: list services such as styling, tables, or equipment.</div></div>
+                        <div class="col-12"><label class="form-label" for="special_requests">Special requests</label><textarea id="special_requests" name="special_requests" class="form-control" rows="2">{{ old('special_requests') }}</textarea><div class="form-text">Optional: share dietary needs or event-specific requests.</div></div>
+                        <div class="col-12"><label class="form-label" for="additional_notes">Additional notes</label><textarea id="additional_notes" name="additional_notes" class="form-control" rows="2">{{ old('additional_notes') }}</textarea><div class="form-text">Optional: anything else our team should know.</div></div>
                         <div class="col-12">
                             <div class="g-recaptcha" data-sitekey="{{ config('services.recaptcha.site_key') }}"></div>
                             @error('g-recaptcha-response')
@@ -102,6 +102,8 @@
     .form-control,.form-select{border:1px solid #e7ddd0;border-radius:14px;padding:.8rem 1rem;background:#fff;color:var(--ink)}
     .form-control:focus,.form-select:focus{border-color:var(--wine);box-shadow:0 0 0 .2rem rgba(109,48,36,.12)}
     .date-availability{display:block;margin-top:.45rem;font-size:.82rem}
+    #estimated_total{display:flex;flex-wrap:wrap;align-items:center;width:100%;min-height:46px;height:auto;overflow-wrap:anywhere;white-space:normal;background:#fff;line-height:1.5;font-weight:700}
+    body.dark-mode #estimated_total{background:#151515;border-color:#555047;color:#f5f1e9}
     .floating-toast{position:fixed;right:1.25rem;bottom:1.25rem;display:flex;align-items:center;gap:.9rem;width:min(360px,calc(100vw - 2rem));background:#1f1c1a;color:#fff;padding:1rem 1rem;border-radius:16px;box-shadow:0 20px 50px rgba(0,0,0,.18);opacity:0;transform:translateY(20px);transition:.28s ease;z-index:2000}
     .floating-toast.show{opacity:1;transform:translateY(0)}
     .floating-toast__icon{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.12);font-weight:800;color:#d8f7d0}
@@ -121,6 +123,33 @@ if (reservationToast) {
     setTimeout(hideToast, 6000);
     closeButton?.addEventListener('click', hideToast);
 }
+
+const packageSelect = document.getElementById('package_id');
+const guestInput = document.getElementById('guest_count');
+const estimatedTotal = document.getElementById('estimated_total');
+const guestGuidance = document.getElementById('guest-guidance');
+const updateEstimate = () => {
+    const option = packageSelect?.selectedOptions[0];
+    const guests = Number(guestInput?.value);
+    if (!option?.dataset.price || !guests) {
+        estimatedTotal.textContent = 'Choose package + guests';
+        return;
+    }
+    const minimum = Number(option.dataset.minGuests);
+    const maximum = Number(option.dataset.maxGuests);
+    guestInput.min = String(minimum);
+    guestInput.max = String(maximum);
+    guestGuidance.textContent = `This package serves ${minimum} to ${maximum} guests.`;
+    if (guests < minimum || guests > maximum) {
+        estimatedTotal.textContent = `Choose between ${minimum} and ${maximum} guests for this package`;
+        return;
+    }
+    const total = Number(option.dataset.price) * guests;
+    estimatedTotal.textContent = `PHP ${total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+};
+packageSelect?.addEventListener('change', updateEstimate);
+guestInput?.addEventListener('input', updateEstimate);
+updateEstimate();
 
 const dateInput=document.getElementById('event_date'), availability=document.getElementById('date-availability'), submitButton=document.getElementById('submit-reservation');
 if (dateInput && availability && submitButton) {

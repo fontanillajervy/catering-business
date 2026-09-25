@@ -54,6 +54,8 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    'business_address' => env('BUSINESS_ADDRESS', 'Quezon City, Metro Manila'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

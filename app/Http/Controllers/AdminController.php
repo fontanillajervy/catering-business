@@ -21,45 +21,7 @@ class AdminController extends Controller
         $serviceCount = Service::count();
         $packageCount = Package::count();
 
-        $selectedDate = $request->query('date');
-        $selectedReservations = $selectedDate
-            ? Reservation::with('package')->whereDate('event_date', $selectedDate)->orderBy('event_time')->get()
-            : collect();
-
-        $monthStart = now()->startOfMonth()->startOfWeek();
-        $monthEnd = now()->endOfMonth()->endOfWeek();
-
-        $bookingsByDate = Reservation::whereNotNull('event_date')
-            ->whereBetween('event_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
-            ->orderBy('event_date')
-            ->orderBy('full_name')
-            ->get()
-            ->groupBy(fn ($reservation) => \Carbon\Carbon::parse($reservation->event_date)->toDateString());
-
-        $calendarDays = [];
-        $cursor = $monthStart->copy();
-
-        while ($cursor->lte($monthEnd)) {
-            $dateKey = $cursor->toDateString();
-            $calendarDays[] = [
-                'date' => $dateKey,
-                'day' => $cursor->day,
-                'isCurrentMonth' => $cursor->month === now()->month,
-                'isSelected' => $selectedDate === $dateKey,
-                'bookings' => $bookingsByDate->get($dateKey, collect())->pluck('full_name')->filter()->values()->all(),
-            ];
-
-            $cursor->addDay();
-        }
-
-        $sidebarCalendar = [
-            'monthLabel' => now()->translatedFormat('F Y'),
-            'days' => $calendarDays,
-            'bookings' => $bookingsByDate->map(fn ($group) => $group->pluck('full_name')->filter()->values()->all())->all(),
-            'selectedDate' => $selectedDate,
-        ];
-
-        return view('admin.dashboard', compact('reservationCount', 'inquiryCount', 'serviceCount', 'packageCount', 'sidebarCalendar', 'selectedReservations', 'selectedDate'));
+        return view('admin.dashboard', compact('reservationCount', 'inquiryCount', 'serviceCount', 'packageCount'));
     }
 
     public function reservations(Request $request)
@@ -273,28 +235,24 @@ class AdminController extends Controller
 
     public function updateReservationStatus(Request $request, Reservation $reservation)
     {
+        $previousStatus = $reservation->status;
         $data = $request->validate([
             'status' => ['sometimes', 'required', 'in:pending,confirmed,completed,cancelled'],
             'payment_status' => ['sometimes', 'nullable', 'in:Unpaid,Downpayment,Fully Paid'],
             'payment_type' => ['sometimes', 'nullable', 'in:Unpaid,Downpayment,Full Payment'],
-            'estimated_budget' => ['sometimes', 'nullable', 'numeric', 'min:0'],
-            'amount_paid' => ['sometimes', 'nullable', 'numeric', 'min:0'],
+            'amount_paid' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:' . (float) ($reservation->estimated_budget ?? 0)],
             'mark_fully_paid' => ['sometimes', 'nullable', 'boolean'],
         ]);
 
-        $totalAmount = (float) ($data['estimated_budget'] ?? $reservation->estimated_budget ?? 0);
+        $totalAmount = (float) ($reservation->estimated_budget ?? 0);
         $amountPaid = (float) ($data['amount_paid'] ?? $reservation->amount_paid ?? 0);
-
-        if (array_key_exists('estimated_budget', $data)) {
-            $reservation->estimated_budget = $totalAmount;
-        }
 
         if ($request->boolean('mark_fully_paid')) {
             $data['payment_status'] = 'Fully Paid';
             $data['payment_type'] = 'Full Payment';
             $data['amount_paid'] = $totalAmount;
             $data['balance'] = 0.0;
-        } elseif (array_key_exists('amount_paid', $data) || array_key_exists('payment_type', $data) || array_key_exists('payment_status', $data) || array_key_exists('estimated_budget', $data) || $request->has('amount_paid') || $request->has('payment_type')) {
+        } elseif (array_key_exists('amount_paid', $data) || array_key_exists('payment_type', $data) || array_key_exists('payment_status', $data) || $request->has('amount_paid') || $request->has('payment_type')) {
             if ($amountPaid <= 0) {
                 $data['payment_status'] = 'Unpaid';
                 $data['payment_type'] = $data['payment_type'] ?? 'Unpaid';
@@ -310,17 +268,37 @@ class AdminController extends Controller
             $data['balance'] = round(max(0, $totalAmount - $amountPaid), 2);
         }
 
-        if (array_key_exists('estimated_budget', $data) && ! array_key_exists('amount_paid', $data) && ! array_key_exists('payment_status', $data) && ! array_key_exists('payment_type', $data) && ! $request->boolean('mark_fully_paid')) {
-            $data['balance'] = round(max(0, $totalAmount - ($reservation->amount_paid ?? 0)), 2);
-        }
-
         if (! isset($data['balance']) && $reservation->amount_paid !== null) {
             $data['balance'] = round(max(0, $totalAmount - ($reservation->amount_paid ?? 0)), 2);
         }
 
         $reservation->update($data);
 
-        return back()->with('success', 'Reservation saved successfully.');
+        $notificationFailed = false;
+        if (isset($data['status']) && $data['status'] !== $previousStatus) {
+            try {
+                Mail::to($reservation->email)->send(new \App\Mail\ReservationStatusMail(
+                    $reservation->reservation_code,
+                    $reservation->full_name,
+                    $reservation->status,
+                ));
+            } catch (\Throwable $exception) {
+                report($exception);
+                $notificationFailed = true;
+            }
+        }
+
+        $message = $request->input('status') === 'cancelled'
+            ? 'Reservation cancelled.'
+            : (($request->has('amount_paid') || $request->boolean('mark_fully_paid'))
+                ? 'Payment details updated.'
+                : 'Reservation status updated.');
+
+        if ($notificationFailed) {
+            $message .= ' Email notification could not be sent; check Gmail SMTP settings.';
+        }
+
+        return back()->with('success', $message);
     }
 
     public function uploadReservationContract(Request $request, Reservation $reservation)

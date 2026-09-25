@@ -5,7 +5,9 @@
     <h1 class="fw-bold mb-1">Backups</h1>
     <p class="text-muted mb-4">Create a downloadable snapshot of your catering data.</p>
     @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
-    <form method="POST" action="{{ route('admin.backups.create') }}" class="mb-3">@csrf<button class="btn btn-primary">Create Backup</button></form>
+    @if(session('error'))<div class="alert alert-danger">{{ session('error') }}</div>@endif
+    <p class="form-text">Backups include application and reservation data. Restoring replaces the matching tables in the current database.</p>
+    <form method="POST" action="{{ route('admin.backups.create') }}" class="mb-3" onsubmit="return confirm('Create a new database backup now?')">@csrf<button class="btn btn-primary">Create Backup</button></form>
     <div class="card p-4">
         <div class="backup-list">
             @forelse($backups as $backup)
@@ -13,8 +15,8 @@
                     <div><strong>{{ $backup }}</strong><small class="d-block text-muted">{{ number_format(filesize(storage_path('app/backups/' . $backup)) / 1024, 1) }} KB</small></div>
                     <div class="backup-actions">
                         <form method="POST" action="{{ route('admin.backups.download') }}">@csrf<input type="hidden" name="backup" value="{{ $backup }}"><button class="btn btn-sm btn-outline-secondary" type="submit">Download</button></form>
-                        <form method="POST" action="{{ route('admin.backups.restore') }}" onsubmit="return confirm('Restore this backup? Current database data will be replaced.');">@csrf<input type="hidden" name="backup" value="{{ $backup }}"><button class="btn btn-sm btn-outline-danger" type="submit">Restore</button></form>
-                        <form method="POST" action="{{ route('admin.backups.delete') }}" onsubmit="return confirm('Delete this backup permanently?');">@csrf @method('DELETE')<input type="hidden" name="backup" value="{{ $backup }}"><button class="btn btn-sm btn-outline-danger" type="submit">Delete</button></form>
+                        <form method="POST" action="{{ route('admin.backups.restore') }}" onsubmit="return confirm('Restore {{ $backup }}? Existing data in the backup tables will be replaced.');">@csrf<input type="hidden" name="backup" value="{{ $backup }}"><button class="btn btn-sm btn-outline-danger" type="submit">Restore</button></form>
+                        <form method="POST" action="{{ route('admin.backups.delete') }}" onsubmit="return confirm('Permanently delete {{ $backup }}?');">@csrf @method('DELETE')<input type="hidden" name="backup" value="{{ $backup }}"><button class="btn btn-sm btn-outline-danger" type="submit">Delete</button></form>
                     </div>
                 </div>
             @empty

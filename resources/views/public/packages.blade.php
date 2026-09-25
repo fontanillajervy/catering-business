@@ -12,8 +12,8 @@
 
     <section class="recommendation mb-5" aria-labelledby="recommendation-title">
         <div class="row align-items-center g-4">
-            <div class="col-lg-5"><div class="eyebrow text-white-50 mb-2">Not sure where to begin?</div><h2 id="recommendation-title">Find the right package in seconds.</h2><p class="mb-0 text-white-50">Share your estimated budget and guest count. We’ll recommend the best tier for your event.</p></div>
-            <div class="col-lg-7"><div class="recommendation-form"><div><label for="budget">Total budget (&#8369;)</label><input id="budget" type="number" min="1" placeholder="e.g. 60000"></div><div><label for="guests">Number of guests</label><input id="guests" type="number" min="1" placeholder="e.g. 80"></div><button id="recommend-button" type="button">Recommend a package</button></div><div id="recommendation-result" class="recommendation-result" aria-live="polite">Enter your details to see a recommendation.</div></div>
+            <div class="col-lg-5"><div class="eyebrow text-white-50 mb-2">Not sure where to begin?</div><h2 id="recommendation-title">Find the right package in seconds.</h2><p class="mb-0 text-white-50">Share your total budget and guest count. We compare estimated event totals, not per-person prices.</p></div>
+            <div class="col-lg-7"><div class="recommendation-form"><div><label for="budget">Total budget (&#8369;)</label><input id="budget" type="number" min="1" placeholder="e.g. 60000"><small>Enter your total event budget.</small></div><div><label for="guests">Number of guests</label><input id="guests" type="number" min="1" placeholder="e.g. 80"><small>Use your expected attendee count.</small></div><button id="recommend-button" type="button">Recommend a package</button></div><div id="recommendation-result" class="recommendation-result" aria-live="polite">Enter your details to see a recommendation.</div></div>
         </div>
     </section>
 
@@ -23,15 +23,20 @@
         <div class="col-md-4"><div class="feature-box h-100"><div class="feature-icon">🤝</div><h3>Planning support</h3><p>We help you tailor the package to your guest count, guest preferences, and event flow.</p></div></div>
     </div>
 
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-2 mb-3">
+        <div><div class="eyebrow mb-2">Our catering packages</div><h2 class="section-title mb-0">Choose your package</h2></div>
+        <p class="text-muted mb-0">Estimates reflect the minimum guest count shown.</p>
+    </div>
     <div class="row g-4">
         @forelse($packages as $package)
             @php($tier = strtolower($package->name))
             <div class="col-md-6 col-xl-3 package-column" data-package-card data-name="{{ $package->name }}" data-price="{{ $package->price }}" data-min-guests="{{ $package->min_guests }}" data-max-guests="{{ $package->max_guests }}">
                 <article class="package-card h-100 {{ $package->is_featured ? 'is-featured' : '' }}">
                     @if($package->is_featured)<div class="package-ribbon">Most popular</div>@endif
+                    @if($package->image_path)<img class="package-image" src="{{ asset('storage/' . $package->image_path) }}" alt="{{ $package->name }} catering package">@endif
                     <div class="package-tier package-tier--{{ $tier }}">{{ $package->name }}</div>
                     <p class="package-description">{{ $package->description }}</p>
-                    <div class="package-price"><span>from</span> &#8369;{{ number_format($package->price, 0) }} <small>/ guest</small></div>
+                    <div class="package-price"><span>Estimated total from</span> &#8369;{{ number_format((float) $package->price * $package->min_guests, 0) }}</div>
                     <div class="package-guests">For {{ $package->min_guests }}–{{ $package->max_guests }} guests</div>
                     <div class="package-rule"></div>
                     <p class="package-inclusion"><strong>Includes</strong>{{ $package->menu }}</p>
@@ -75,6 +80,10 @@
 <style>
     .recommendation{background:#6d3024;color:#fff;padding:clamp(1.6rem,4vw,3rem)}.recommendation h2{font-size:clamp(1.85rem,3vw,2.65rem);line-height:1.08}.recommendation-form{display:grid;grid-template-columns:1fr 1fr auto;gap:.65rem}.recommendation-form label{display:block;margin-bottom:.32rem;font-size:.75rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#f2d8c7}.recommendation-form input{width:100%;border:1px solid rgba(255,255,255,.28);background:#fffdf9;color:#20201d;padding:.78rem}.recommendation-form button{align-self:end;border:0;background:#d7a766;color:#332116;padding:.83rem 1rem;font-weight:800;white-space:nowrap}.recommendation-form button:hover{background:#ecc384}.recommendation-result{min-height:1.4rem;margin-top:1rem;color:#fff7ef;font-weight:600}.package-card{display:flex;flex-direction:column;position:relative;height:100%;padding:2rem 1.5rem 1.5rem;background:var(--paper);border:1px solid var(--line);color:var(--ink);transition:.2s ease}.package-card:hover,.package-card.is-recommended{transform:translateY(-5px);box-shadow:0 18px 34px rgba(70,42,24,.12)}.package-card.is-recommended{border:2px solid var(--terracotta)}.package-ribbon{position:absolute;right:0;top:0;background:#b66545;color:#fff;padding:.36rem .7rem;font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.package-tier{font-family:'Playfair Display',Georgia,serif;font-size:2.3rem;font-weight:700}.package-tier--silver{color:#737a7f}.package-tier--gold{color:#aa7926}.package-tier--platinum{color:#68727a}.package-tier--diamond{color:#6d3024}.package-description{color:var(--muted);line-height:1.55;min-height:5rem;margin:1rem 0}.package-price{font-family:'Playfair Display',Georgia,serif;color:var(--wine);font-size:1.9rem;font-weight:700}.package-price span,.package-price small{font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:700}.package-guests{margin-top:.4rem;color:var(--muted);font-size:.85rem;font-weight:600}.package-rule{height:1px;background:var(--line);margin:1.35rem 0}.package-inclusion{font-size:.85rem;color:var(--muted);line-height:1.6}.package-inclusion strong{display:block;margin-bottom:.35rem;color:var(--ink);font-size:.73rem;letter-spacing:.08em;text-transform:uppercase}body.dark-mode .package-tier--silver,body.dark-mode .package-tier--platinum{color:#d8e0e5}body.dark-mode .package-tier--gold{color:#f1c96d}body.dark-mode .package-tier--diamond{color:#efb19b}@media(max-width:767px){.recommendation-form{grid-template-columns:1fr}.recommendation-form button{width:100%}}
 </style>
+<style>
+    .package-image{display:block;width:calc(100% + 3rem);max-width:calc(100% + 3rem);aspect-ratio:16/10;object-fit:cover;margin:-2rem -1.5rem 1.2rem}
+    .package-price span{display:block;font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:700}
+</style>
 <script>
     document.getElementById('recommend-button').addEventListener('click', function () {
         const budget = Number(document.getElementById('budget').value);
@@ -83,13 +92,15 @@
         const cards = Array.from(document.querySelectorAll('[data-package-card]'));
         cards.forEach(card => card.querySelector('.package-card').classList.remove('is-recommended'));
         if (!budget || !guests) { result.textContent = 'Please enter both your total budget and number of guests.'; return; }
-        const budgetPerGuest = budget / guests;
-        const eligible = cards.filter(card => guests >= Number(card.dataset.minGuests) && guests <= Number(card.dataset.maxGuests) && budgetPerGuest >= Number(card.dataset.price));
-        const choice = eligible[eligible.length - 1] || cards.filter(card => guests >= Number(card.dataset.minGuests) && guests <= Number(card.dataset.maxGuests))[0];
+        const matchingGuestRange = cards.filter(card => guests >= Number(card.dataset.minGuests) && guests <= Number(card.dataset.maxGuests));
+        const eligible = matchingGuestRange.filter(card => budget >= Number(card.dataset.price) * guests);
+        const choice = eligible[eligible.length - 1] || matchingGuestRange[0];
         if (!choice) { result.textContent = 'For this guest count, please send an inquiry and we’ll prepare a custom package.'; return; }
         choice.querySelector('.package-card').classList.add('is-recommended');
-        const price = Number(choice.dataset.price).toLocaleString();
-        result.innerHTML = `<strong>${choice.dataset.name}</strong> is our recommendation for ${guests} guests (starting at ₱${price} per guest).`;
+        const total = Number(choice.dataset.price) * guests;
+        const price = total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        const budgetNote = total > budget ? ' This option is above your stated budget.' : '';
+        result.textContent = `${choice.dataset.name} is our recommendation for ${guests} guests, with an estimated total of ₱${price}.${budgetNote}`;
         choice.scrollIntoView({behavior: 'smooth', block: 'center'});
     });
 </script>

@@ -32,7 +32,7 @@
                         <td>
                             <div class="d-flex flex-column flex-md-row gap-2">
                                 <a class="btn btn-sm btn-outline-secondary" href="{{ route('admin.inquiries.show', $inquiry) }}">View</a>
-                                <form method="POST" action="{{ route('admin.inquiries.status', $inquiry) }}" class="d-flex gap-1">
+                                <form method="POST" action="{{ route('admin.inquiries.status', $inquiry) }}" class="d-flex gap-1" onsubmit="return confirm('Update this inquiry status?')">
                                     @csrf @method('PATCH')
                                     <select name="status" class="form-select form-select-sm" style="max-width:100px">
                                         <option value="new" @selected($inquiry->status === 'new')>New</option>

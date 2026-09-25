@@ -37,6 +37,7 @@
                     @csrf
                     <label class="form-label" for="email">Email</label>
                     <input id="email" type="email" name="email" value="{{ old('email') }}" class="form-control form-control-lg @error('email') is-invalid @enderror" required autofocus>
+                    <div class="form-text">Enter the email address for the account you need to recover.</div>
                     @error('email')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror

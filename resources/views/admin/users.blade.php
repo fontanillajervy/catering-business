@@ -14,16 +14,18 @@
         <div class="col-lg-12 col-xl-4">
             <div class="card p-4 h-100">
                 <h5 class="fw-bold mb-3">Add admin</h5>
-                <form method="POST" action="{{ route('admin.users.store') }}">
+                <form method="POST" action="{{ route('admin.users.store') }}" onsubmit="return confirm('Create this administrator account?')">
                     @csrf
                     <div class="mb-3">
                         <label class="form-label" for="name">Name</label>
                         <input class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name') }}" required>
+                        <div class="form-text">Use the administrator’s display name.</div>
                         @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="email">Email</label>
                         <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}" required>
+                        <div class="form-text">This address will be used to sign in.</div>
                         @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     <div class="mb-3">
@@ -32,6 +34,7 @@
                             <option value="full" {{ old('role') === 'full' ? 'selected' : '' }}>Primary admin</option>
                             <option value="limited" {{ old('role') === 'limited' ? 'selected' : '' }}>Team admin</option>
                         </select>
+                        <div class="form-text">Primary admins can manage settings; team admins have limited access.</div>
                         @error('role')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     <div class="mb-3">
@@ -73,11 +76,11 @@
                                     </td>
                                     <td>
                                         <div class="team-admin-access">
-                                            <form method="POST" action="{{ route('admin.users.reset', $user) }}" class="team-admin-reset-form">
+                                            <form method="POST" action="{{ route('admin.users.reset', $user) }}" class="team-admin-reset-form" onsubmit="return confirm('Reset this administrator’s password?')">
                                                 @csrf
                                                 @method('PUT')
-                                                <input type="password" name="password" class="form-control form-control-sm" placeholder="New password" required minlength="8">
-                                                <input type="password" name="password_confirmation" class="form-control form-control-sm" placeholder="Confirm" required minlength="8">
+                                                <input type="password" name="password" class="form-control form-control-sm" placeholder="New password (8+ chars)" title="Use at least 8 characters." required minlength="8">
+                                                <input type="password" name="password_confirmation" class="form-control form-control-sm" placeholder="Confirm password" title="Re-enter the new password." required minlength="8">
                                                 <div class="d-grid">
                                                     <button type="submit" class="btn btn-sm btn-outline-primary">Reset</button>
                                                 </div>

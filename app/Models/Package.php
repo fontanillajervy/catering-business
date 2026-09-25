@@ -18,6 +18,7 @@ class Package extends Model
         'addons',
         'event_type',
         'is_featured',
+        'image_path',
     ];
 
     protected function casts(): array

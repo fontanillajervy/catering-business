@@ -16,7 +16,12 @@ class BackupController extends Controller
 
     public function createBackup(BackupService $backupService)
     {
-        $path = $backupService->create();
+        try {
+            $backupService->create();
+        } catch (\Throwable $exception) {
+            report($exception);
+            return back()->with('error', 'Backup creation failed. Check the application log and storage permissions.');
+        }
 
         return back()->with('success', 'Database backup created successfully.');
     }
@@ -24,7 +29,12 @@ class BackupController extends Controller
     public function restoreBackup(Request $request, BackupService $backupService)
     {
         $data = $request->validate(['backup' => ['required', 'string']]);
-        $restoredRows = $backupService->restore($data['backup']);
+        try {
+            $restoredRows = $backupService->restore($data['backup']);
+        } catch (\Throwable $exception) {
+            report($exception);
+            return back()->with('error', 'Backup restoration failed. The database was not intentionally left partially restored. Check the application log.');
+        }
 
         return back()->with('success', "Backup restored successfully ({$restoredRows} rows).");
     }

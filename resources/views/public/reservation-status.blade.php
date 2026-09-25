@@ -27,7 +27,7 @@
 
                 <form method="GET" action="{{ route('reservation.status') }}" class="mb-4">
                     <div class="input-group input-group-lg">
-                        <input type="text" name="code" value="{{ old('code', $code ?? '') }}" class="form-control" placeholder="e.g. RES-ABCD1234" required>
+                            <input type="text" name="code" value="{{ old('code', $code ?? '') }}" class="form-control" placeholder="e.g. RES-ABCD1234" aria-label="Reservation ID" required>
                         <button type="submit" class="btn btn-primary">Check status</button>
                     </div>
                 </form>

@@ -52,7 +52,7 @@ class PublicPagesTest extends TestCase
             'estimated_budget' => 10000,
             'package_id' => 1,
             'website' => '',
-            'form_started' => now()->timestamp,
+            'form_started' => now()->subSeconds(5)->timestamp,
             'g-recaptcha-response' => 'test',
         ]);
 
@@ -115,10 +115,79 @@ class PublicPagesTest extends TestCase
 
         $this->assertFalse($validator->fails(), 'Expected valid Philippine mobile numbers to pass validation. Errors: ' . json_encode($validator->errors()->all()));
 
-        $request->merge(['contact_number' => '09814542318']);
+        $request->merge(['contact_number' => '+639814542318']);
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), (new \App\Http\Requests\StoreReservationRequest)->rules());
 
-        $this->assertFalse($validator->fails(), 'Expected 09-prefixed numbers to pass validation. Errors: ' . json_encode($validator->errors()->all()));
+        $this->assertFalse($validator->fails(), 'Expected +63 format to pass validation. Errors: ' . json_encode($validator->errors()->all()));
+    }
+
+    public function test_reservation_rejects_non_philippine_number_formats(): void
+    {
+        $request = new \Illuminate\Http\Request([
+            'full_name' => 'Test User',
+            'contact_number' => '0917123456',
+            'email' => 'valid@example.com',
+            'address' => '123 Main Street, Cebu City',
+            'event_type' => 'Wedding',
+            'event_date' => now()->addDays(3)->toDateString(),
+            'event_time' => '18:00',
+            'venue' => 'Sample Venue Hall',
+            'guest_count' => 50,
+            'estimated_budget' => 10000,
+            'package_id' => 1,
+            'website' => '',
+            'form_started' => now()->timestamp,
+            'g-recaptcha-response' => 'test',
+        ]);
+
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), (new \App\Http\Requests\StoreReservationRequest)->rules());
+
+        $this->assertTrue($validator->fails(), 'Expected a non-Philippine number to fail validation.');
+        $this->assertArrayHasKey('contact_number', $validator->errors()->toArray());
+    }
+
+    public function test_reservation_sends_confirmation_email_with_reservation_id_to_customer(): void
+    {
+        \Illuminate\Support\Facades\Mail::fake();
+        $captchaVerifier = \Mockery::mock(\App\Services\RecaptchaVerifier::class);
+        $captchaVerifier->shouldReceive('verify')->once()->andReturnTrue();
+        $this->app->instance(\App\Services\RecaptchaVerifier::class, $captchaVerifier);
+
+        \App\Models\Package::create([
+            'name' => 'Classic Package',
+            'slug' => 'classic-package',
+            'price' => 500,
+            'min_guests' => 20,
+            'max_guests' => 200,
+            'event_type' => 'Wedding',
+        ]);
+        $expectedTotal = (float) \App\Models\Package::findOrFail(1)->price * 50;
+
+        $response = $this->from('/reservation')->post('/reservation', [
+            'full_name' => 'Test User',
+            'contact_number' => '+639814542318',
+            'email' => 'customer@gmail.com',
+            'address' => '123 Main Street, Cebu City',
+            'event_type' => 'Wedding',
+            'event_date' => now()->addDays(4)->toDateString(),
+            'event_time' => '18:00',
+            'venue' => 'Sample Venue Hall',
+            'guest_count' => 50,
+            'estimated_budget' => 10000,
+            'package_id' => 1,
+            'website' => '',
+            'form_started' => now()->subSeconds(5)->timestamp,
+            'g-recaptcha-response' => 'test',
+        ]);
+
+        $response->assertRedirect('/reservation');
+        $response->assertSessionHasNoErrors();
+        $this->assertSame($expectedTotal, (float) \App\Models\Reservation::latest('id')->firstOrFail()->estimated_budget);
+        \Illuminate\Support\Facades\Mail::assertSent(\App\Mail\ReservationConfirmationMail::class, function ($mail) use ($expectedTotal) {
+            return $mail->hasTo('customer@gmail.com')
+                && $mail->reservationCode !== ''
+            && $mail->estimatedBudget === $expectedTotal;
+        });
     }
 
     public function test_admin_report_csv_export_uses_the_selected_period_summary(): void
@@ -133,7 +202,7 @@ class PublicPagesTest extends TestCase
         $this->assertStringContainsString('Reservations', $csv);
     }
 
-    public function test_admin_can_update_total_amount_down_payment_and_mark_reservation_fully_paid(): void
+    public function test_admin_cannot_manually_change_total_and_can_update_payment_amount(): void
     {
         $reservation = \App\Models\Reservation::create([
             'package_id' => 1,
@@ -163,28 +232,28 @@ class PublicPagesTest extends TestCase
         app(\App\Http\Controllers\AdminController::class)->updateReservationStatus($request, $reservation);
         $reservation->refresh();
 
-        $this->assertSame(35000.0, (float) $reservation->estimated_budget);
+        $this->assertSame(25000.0, (float) $reservation->estimated_budget);
         $this->assertSame(8000.0, (float) $reservation->amount_paid);
         $this->assertSame('Downpayment', $reservation->payment_status);
-        $this->assertSame(27000.0, (float) $reservation->balance);
+        $this->assertSame(17000.0, (float) $reservation->balance);
 
         $fullyPaidRequest = new \Illuminate\Http\Request([
             'estimated_budget' => 35000,
-            'amount_paid' => 35000,
+            'amount_paid' => 25000,
             'mark_fully_paid' => true,
         ]);
 
         app(\App\Http\Controllers\AdminController::class)->updateReservationStatus($fullyPaidRequest, $reservation);
         $reservation->refresh();
 
-        $this->assertSame(35000.0, (float) $reservation->estimated_budget);
+        $this->assertSame(25000.0, (float) $reservation->estimated_budget);
         $this->assertSame('Fully Paid', $reservation->payment_status);
         $this->assertSame('Full Payment', $reservation->payment_type);
-        $this->assertSame(35000.0, (float) $reservation->amount_paid);
+        $this->assertSame(25000.0, (float) $reservation->amount_paid);
         $this->assertSame(0.0, (float) $reservation->balance);
     }
 
-    public function test_admin_dashboard_sidebar_calendar_lists_booked_customers_for_the_month(): void
+    public function test_admin_dashboard_does_not_include_calendar_data(): void
     {
         $bookingDate = now()->startOfMonth()->addDays(3);
 
@@ -231,11 +300,8 @@ class PublicPagesTest extends TestCase
         $response = app(\App\Http\Controllers\AdminController::class)->index();
         $data = $response->getData(true);
 
-        $this->assertArrayHasKey('sidebarCalendar', $data);
-        $this->assertSame(now()->translatedFormat('F Y'), $data['sidebarCalendar']['monthLabel']);
-        $this->assertArrayHasKey($bookingDate->toDateString(), $data['sidebarCalendar']['bookings']);
-        $this->assertContains('Alice Client', $data['sidebarCalendar']['bookings'][$bookingDate->toDateString()]);
-        $this->assertContains('Bob Client', $data['sidebarCalendar']['bookings'][$bookingDate->toDateString()]);
+        $this->assertArrayNotHasKey('sidebarCalendar', $data);
+        $this->assertArrayNotHasKey('selectedReservations', $data);
     }
 
     public function test_admin_can_track_reservation_payment_status_and_balance(): void

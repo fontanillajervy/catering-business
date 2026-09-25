@@ -4,21 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreInquiryRequest;
 use App\Models\Inquiry;
-use ReCaptcha\ReCaptcha;
+use App\Services\RecaptchaVerifier;
 
 class InquiryController extends Controller
 {
-    public function store(StoreInquiryRequest $request)
+    public function store(StoreInquiryRequest $request, RecaptchaVerifier $recaptchaVerifier)
     {
         if (now()->timestamp - (int) $request->input('form_started') < 3) {
             return back()->withInput()->withErrors(['full_name' => 'Unable to submit this request. Please try again.']);
         }
 
-        // Verify reCAPTCHA
-        $recaptcha = new ReCaptcha(config('services.recaptcha.secret_key'));
-        $resp = $recaptcha->verify($request->input('g-recaptcha-response'), $_SERVER['REMOTE_ADDR'] ?? '');
-        
-        if (!$resp->isSuccess()) {
+        if (! $recaptchaVerifier->verify($request->input('g-recaptcha-response'), $request->ip() ?? '')) {
             return back()->withInput()->withErrors(['g-recaptcha-response' => 'Please verify that you are not a robot.']);
         }
 

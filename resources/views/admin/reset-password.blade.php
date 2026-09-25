@@ -35,6 +35,7 @@
                     <div class="mb-3">
                         <label class="form-label" for="email">Email</label>
                         <input id="email" type="email" name="email" value="{{ old('email', $email) }}" class="form-control form-control-lg" required>
+                        <div class="form-text">Confirm the email address linked to this reset request.</div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="password">New password</label>
@@ -44,6 +45,7 @@
                                 <i class="fas fa-eye"></i>
                             </button>
                         </div>
+                        <div class="form-text">Choose a strong password that meets the account requirements.</div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="password_confirmation">Confirm new password</label>
@@ -53,6 +55,7 @@
                                 <i class="fas fa-eye"></i>
                             </button>
                         </div>
+                        <div class="form-text">Re-enter the new password exactly.</div>
                     </div>
                     <button class="btn btn-primary w-100 py-2" type="submit">Reset password</button>
                 </form>

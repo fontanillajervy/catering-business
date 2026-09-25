@@ -14,20 +14,20 @@
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
-    <form method="GET" action="{{ route('admin.reservations') }}" class="row g-3 align-items-end mb-4">
-        <div class="col-md-4 col-xl-3">
+    <form method="GET" action="{{ route('admin.reservations') }}" class="reservation-filter-grid mb-4">
+        <div class="filter-field filter-field--search">
             <label class="form-label fw-semibold mb-1">Customer</label>
             <input type="text" name="search" class="form-control" value="{{ old('search', $search ?? '') }}" placeholder="Name, email, phone, code">
         </div>
-        <div class="col-md-3 col-xl-2">
+        <div class="filter-field">
             <label class="form-label fw-semibold mb-1">From date</label>
             <input type="date" name="date_from" class="form-control" value="{{ old('date_from', $dateFrom ?? '') }}">
         </div>
-        <div class="col-md-3 col-xl-2">
+        <div class="filter-field">
             <label class="form-label fw-semibold mb-1">To date</label>
             <input type="date" name="date_to" class="form-control" value="{{ old('date_to', $dateTo ?? '') }}">
         </div>
-        <div class="col-md-4 col-xl-2">
+        <div class="filter-field">
             <label class="form-label fw-semibold mb-1">Reservation status</label>
             <select name="status" class="form-select">
                 <option value="">All statuses</option>
@@ -37,7 +37,7 @@
                 <option value="cancelled" @selected($status === 'cancelled')>Cancelled</option>
             </select>
         </div>
-        <div class="col-md-4 col-xl-2">
+        <div class="filter-field">
             <label class="form-label fw-semibold mb-1">Payment status</label>
             <select name="payment_status" class="form-select">
                 <option value="">All payments</option>
@@ -46,7 +46,7 @@
                 <option value="Fully Paid" @selected($paymentStatus === 'Fully Paid')>Fully Paid</option>
             </select>
         </div>
-        <div class="col-md-4 col-xl-2 d-flex gap-2">
+        <div class="filter-field filter-field--actions d-flex gap-2">
             <button type="submit" class="btn luxury-btn w-100">Filter</button>
             @if($status || $paymentStatus || ($search ?? '') !== '' || ($dateFrom ?? '') !== '' || ($dateTo ?? '') !== '')
                 <a href="{{ route('admin.reservations') }}" class="btn btn-outline-secondary w-100">Clear</a>
@@ -135,7 +135,7 @@
                         <td>
                             <div class="status-cell">
                                 <span class="status-badge status-badge--{{ $reservation->status }}">{{ $statusLabel }}</span>
-                                <form method="POST" action="{{ route('admin.reservations.status', $reservation) }}">
+                                        <form method="POST" action="{{ route('admin.reservations.status', $reservation) }}" onsubmit="return confirm(this.querySelector('[name=status]').value === 'cancelled' ? 'Cancel this reservation?' : 'Update this reservation status?')">
                                     @csrf @method('PATCH')
                                     <select name="status" class="form-select form-select-sm">
                                         <option value="pending" @selected($reservation->status === 'pending')>Pending</option>
@@ -148,12 +148,12 @@
                             </div>
                         </td>
                         <td>
-                            <form method="POST" action="{{ route('admin.reservations.status', $reservation) }}" class="payment-form">
+                            <form method="POST" action="{{ route('admin.reservations.status', $reservation) }}" class="payment-form" onsubmit="return confirm('Save these payment details?')">
                                 @csrf @method('PATCH')
                                 <input type="hidden" name="status" value="{{ $reservation->status }}">
                                 <div class="payment-stack">
-                                    <label class="payment-field-label">Total</label>
-                                    <input type="number" name="estimated_budget" min="0" step="1" value="{{ old('estimated_budget', (int) ($reservation->estimated_budget ?? 0)) }}" class="form-control form-control-sm" placeholder="0">
+                                    <label class="payment-field-label">Estimated total</label>
+                                    <strong class="payment-total">₱{{ number_format((float) ($reservation->estimated_budget ?? 0), 2) }}</strong>
                                     <label class="payment-field-label">Down payment</label>
                                     <input type="number" name="amount_paid" min="0" step="1" value="{{ old('amount_paid', (int) ($reservation->amount_paid ?? 0)) }}" class="form-control form-control-sm" placeholder="0">
                                     <small class="payment-balance">Balance: ₱{{ number_format((float) ($reservation->balance ?? max(0, ($reservation->estimated_budget ?? 0) - ($reservation->amount_paid ?? 0))), 2) }}</small>
@@ -201,7 +201,7 @@
                     <summary>View booking details</summary>
                     <div class="mobile-detail-list">
                         <p><span>Package</span>{{ $reservation->package?->name ?? 'Custom package' }}</p>
-                        <p><span>Budget</span>₱{{ number_format($reservation->estimated_budget, 2) }}</p>
+                        <p><span>Estimated package total</span>₱{{ number_format($reservation->estimated_budget, 2) }}</p>
                         <p><span>Venue</span>{{ $reservation->venue }}</p>
                         <p><span>Service contract</span>
                             @if($reservation->service_contract)
@@ -220,6 +220,11 @@
 </div>
 
 <style>
+    .reservation-filter-grid{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:.75rem;align-items:end}
+    .filter-field{grid-column:span 1;min-width:0}
+    .filter-field--search{grid-column:span 2}
+    .filter-field--actions{grid-column:span 2}
+    .payment-total{display:block;min-height:31px;padding:.35rem .55rem;border:1px solid var(--line);border-radius:7px;background:var(--surface);font-size:.8rem;white-space:nowrap}
     .reservation-stat { height: 100%; padding: 1rem 1.1rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2); }
     .reservation-stat span, .reservation-stat small { display: block; }
     .reservation-stat span, .mobile-event-info span, .mobile-detail-list span { font-size: .68rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
@@ -248,6 +253,8 @@
     .mobile-detail-list p:last-child { margin: 0; }
     .reservation-mobile-card summary { cursor: pointer; font-weight: 700; color: var(--accent); }
     .reservation-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .5rem; padding-top: .75rem; border-top: 1px solid var(--border); }
+    @media(max-width:1199px){.reservation-filter-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.filter-field--search{grid-column:span 2}.filter-field--actions{grid-column:span 2}}
+    @media(max-width:575px){.reservation-filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.filter-field--search,.filter-field--actions{grid-column:span 2}}
     .reservation-actions form { display: flex; gap: .5rem; }
     .reservation-actions .form-select { width: auto; }
     .reservation-action-group { display: flex; flex-direction: column; gap: .3rem; min-width: 0; }
