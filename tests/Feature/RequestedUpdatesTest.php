@@ -8,11 +8,18 @@ use App\Http\Controllers\AdminController;
 use App\Models\ActivityLog;
 use App\Models\Client;
 use App\Models\GalleryItem;
+use App\Models\Inquiry;
 use App\Models\Package;
 use App\Models\Reservation;
+use App\Models\User;
+use App\Mail\InquiryReplyMail;
 use App\Mail\ReservationStatusMail;
 use App\Services\BackupService;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
@@ -86,6 +93,57 @@ class RequestedUpdatesTest extends TestCase
         Mail::assertSent(ReservationStatusMail::class, fn ($mail) => $mail->hasTo('status@example.com')
             && $mail->reservationCode === 'RES-STATUS-001'
             && $mail->status === 'confirmed');
+    }
+
+    public function test_admin_inquiry_reply_is_emailed_to_the_customer(): void
+    {
+        Mail::fake();
+        $inquiry = Inquiry::create([
+            'full_name' => 'Inquiry Client',
+            'contact_number' => '+639123456789',
+            'email' => 'inquiry@example.com',
+            'subject' => 'Wedding catering',
+            'category' => 'Wedding',
+            'message' => 'Please send package details.',
+        ]);
+
+        $this->withSession(['is_admin' => true])
+            ->post(route('admin.inquiries.reply', $inquiry), ['reply' => 'We would be happy to help.'])
+            ->assertRedirect(route('admin.inquiries.show', $inquiry));
+
+        Mail::assertSent(InquiryReplyMail::class, fn ($mail) => $mail->hasTo('inquiry@example.com')
+            && $mail->inquirySubject === 'Wedding catering'
+            && $mail->reply === 'We would be happy to help.');
+        $this->assertDatabaseHas('inquiries', [
+            'id' => $inquiry->id,
+            'admin_reply' => 'We would be happy to help.',
+            'status' => 'responded',
+        ]);
+    }
+
+    public function test_password_reset_email_token_remains_valid_and_resets_password(): void
+    {
+        Notification::fake();
+        $user = User::factory()->create(['email' => 'team-admin@example.com']);
+
+        $this->from(route('password.request'))
+            ->post(route('password.email'), ['email' => $user->email])
+            ->assertRedirect(route('password.request'))
+            ->assertSessionHas('status');
+
+        Notification::assertSentTo($user, ResetPassword::class);
+        $resetNotification = Notification::sent($user, ResetPassword::class)->first();
+        $this->assertNotNull($resetNotification);
+        $this->assertTrue(Password::broker()->tokenExists($user, $resetNotification->token));
+
+        $this->post(route('password.update'), [
+            'email' => $user->email,
+            'token' => $resetNotification->token,
+            'password' => 'NewSecurePassword123!',
+            'password_confirmation' => 'NewSecurePassword123!',
+        ])->assertRedirect(route('admin.login'));
+
+        $this->assertTrue(Hash::check('NewSecurePassword123!', $user->fresh()->password));
     }
 
     public function test_backup_restores_package_rows(): void

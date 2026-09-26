@@ -6,6 +6,7 @@ use App\Models\Inquiry;
 use App\Models\Package;
 use App\Models\Reservation;
 use App\Models\Service;
+use App\Mail\InquiryReplyMail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -178,9 +179,11 @@ class AdminController extends Controller
         $mailError = null;
 
         try {
-            Mail::raw($data['reply'], function ($message) use ($inquiry) {
-                $message->to($inquiry->email, $inquiry->full_name)->subject('Re: ' . $inquiry->subject);
-            });
+            Mail::to($inquiry->email, $inquiry->full_name)->send(new InquiryReplyMail(
+                $inquiry->full_name,
+                $inquiry->subject,
+                $data['reply'],
+            ));
             $mailSent = true;
         } catch (\Throwable $exception) {
             $mailError = $exception;

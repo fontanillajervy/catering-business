@@ -115,4 +115,6 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
+    'booking_notification_address' => env('BOOKING_NOTIFICATION_EMAIL', env('MAIL_FROM_ADDRESS', '')),
+
 ];

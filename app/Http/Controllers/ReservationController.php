@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreReservationRequest;
 use App\Mail\ReservationConfirmationMail;
+use App\Mail\NewReservationNotificationMail;
 use App\Models\Client;
 use App\Models\Package;
 use App\Models\Reservation;
@@ -67,7 +68,7 @@ class ReservationController extends Controller
 
         $reservationCode = $this->generateReservationCode();
 
-        Reservation::create([
+        $reservation = Reservation::create([
             'client_id' => $client->id,
             'package_id' => $request->input('package_id'),
             'full_name' => $request->input('full_name'),
@@ -90,6 +91,7 @@ class ReservationController extends Controller
         $request->session()->flash('reservation_code', $reservationCode);
         $request->session()->flash('reservation_status', 'pending');
 
+        $customerEmailFailed = false;
         try {
             Mail::to($request->input('email'))->send(new ReservationConfirmationMail(
                 $reservationCode,
@@ -100,10 +102,31 @@ class ReservationController extends Controller
             ));
         } catch (\Throwable $exception) {
             report($exception);
-            return redirect()->back()->with('success', 'Your reservation was received, but we could not email your reservation ID. Please save this ID: ' . $reservationCode . '.');
+            $customerEmailFailed = true;
         }
 
-        return redirect()->back()->with('success', 'Your reservation request has been received. Your reservation ID is ' . $reservationCode . '. Please keep this code to check your reservation status.');
+        $businessEmailFailed = false;
+        $notificationAddress = config('mail.booking_notification_address');
+        if (filled($notificationAddress)) {
+            try {
+                Mail::to($notificationAddress)->send(new NewReservationNotificationMail($reservation));
+            } catch (\Throwable $exception) {
+                report($exception);
+                $businessEmailFailed = true;
+            }
+        } else {
+            $businessEmailFailed = true;
+        }
+
+        $message = $customerEmailFailed
+            ? 'Your reservation was received, but we could not email your reservation ID. Please save this ID: ' . $reservationCode . '.'
+            : 'Your reservation request has been received. Your reservation ID is ' . $reservationCode . '. Please keep this code to check your reservation status.';
+
+        if ($businessEmailFailed) {
+            $message .= ' The business notification email could not be sent; please contact the business to confirm your request.';
+        }
+
+        return redirect()->back()->with('success', $message);
     }
 
     private function generateReservationCode(): string

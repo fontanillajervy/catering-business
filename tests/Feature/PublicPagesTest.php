@@ -149,6 +149,7 @@ class PublicPagesTest extends TestCase
     public function test_reservation_sends_confirmation_email_with_reservation_id_to_customer(): void
     {
         \Illuminate\Support\Facades\Mail::fake();
+        config(['mail.booking_notification_address' => 'bookings@3yos.test']);
         $captchaVerifier = \Mockery::mock(\App\Services\RecaptchaVerifier::class);
         $captchaVerifier->shouldReceive('verify')->once()->andReturnTrue();
         $this->app->instance(\App\Services\RecaptchaVerifier::class, $captchaVerifier);
@@ -186,7 +187,12 @@ class PublicPagesTest extends TestCase
         \Illuminate\Support\Facades\Mail::assertSent(\App\Mail\ReservationConfirmationMail::class, function ($mail) use ($expectedTotal) {
             return $mail->hasTo('customer@gmail.com')
                 && $mail->reservationCode !== ''
-            && $mail->estimatedBudget === $expectedTotal;
+                && $mail->estimatedBudget === $expectedTotal;
+        });
+        \Illuminate\Support\Facades\Mail::assertSent(\App\Mail\NewReservationNotificationMail::class, function ($mail) {
+            return $mail->hasTo('bookings@3yos.test')
+                && $mail->reservation->email === 'customer@gmail.com'
+                && $mail->reservation->reservation_code !== '';
         });
     }
 
